@@ -1,0 +1,67 @@
+﻿Sentinel/
+├── .env.example
+├── .gitignore
+├── .env.local
+├── README.md
+├── filetree.txt
+├── package.json
+├── frontend/
+│   ├── .env.local
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── next-env.d.ts
+│   ├── next.config.ts
+│   ├── postcss.config.js
+│   ├── tailwind.config.ts
+│   ├── app/
+│   │   ├── api/
+│   │   │   ├── scan/
+│   │   │   │   └── route.ts
+│   │   │   ├── risk-score/
+│   │   │   │   └── route.ts
+│   │   │   ├── wallet-health/
+│   │   │   │   └── route.ts
+│   │   │   └── revoke/
+│   │   │       └── route.ts
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── TransactionScanner.tsx
+│   │   ├── RiskScoreCard.tsx
+│   │   ├── WalletHealthMonitor.tsx
+│   │   ├── ApprovalRevoke.tsx
+│   │   └── ui/
+│   │       └── .gitkeep
+│   └── public/
+│       └── .gitkeep
+├── backend/
+│   ├── .env.local
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── api/
+│   │   ├── scan.ts
+│   │   ├── riskScore.ts
+│   │   ├── walletHealth.ts
+│   │   └── revoke.ts
+│   ├── agents/
+│   │   ├── scamDetectionAgent.ts
+│   │   ├── riskAnalyzer.ts
+│   │   └── contractInspector.ts
+│   └── lib/
+│       ├── db/
+│       │   └── supabase.ts
+│       ├── okx/
+│       │   └── walletSdk.ts
+│       ├── xlayer/
+│       │   └── rpcClient.ts
+│       └── utils.ts
+├── contracts/
+│   ├── src/
+│   │   └── README.md
+│   └── scripts/
+│       └── README.md
+├── shared/
+│   └── types/
+│       └── index.ts
+└── .git/
