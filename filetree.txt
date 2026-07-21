@@ -1,16 +1,19 @@
-﻿Sentinel/
+Sentinel/
 ├── .env.example
-├── .gitignore
 ├── .env.local
+├── .gitignore
+├── LICENSE
 ├── README.md
 ├── filetree.txt
+├── package-lock.json
 ├── package.json
 ├── frontend/
 │   ├── .env.local
 │   ├── package.json
 │   ├── tsconfig.json
+│   ├── tsconfig.tsbuildinfo
 │   ├── next-env.d.ts
-│   ├── next.config.ts
+│   ├── next.config.mjs
 │   ├── postcss.config.js
 │   ├── tailwind.config.ts
 │   ├── app/
@@ -23,6 +26,9 @@
 │   │   │   │   └── route.ts
 │   │   │   └── revoke/
 │   │   │       └── route.ts
+│   │   ├── fonts/
+│   │   │   ├── Audex-Italic.ttf
+│   │   │   └── Audex-Regular.ttf
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   └── page.tsx
@@ -31,10 +37,59 @@
 │   │   ├── RiskScoreCard.tsx
 │   │   ├── WalletHealthMonitor.tsx
 │   │   ├── ApprovalRevoke.tsx
-│   │   └── ui/
+│   │   ├── approvals/
+│   │   │   └── ApprovalManagerView.tsx
+│   │   ├── community/
+│   │   │   └── ThreatIntelView.tsx
+│   │   ├── components/
+│   │   │   ├── ApprovalRevoke.tsx
+│   │   │   ├── RiskScoreCard.tsx
+│   │   │   ├── TransactionScanner.tsx
+│   │   │   ├── WalletHealthMonitor.tsx
+│   │   │   └── ui/
+│   │   │       └── .gitkeep
+│   │   ├── dashboard/
+│   │   │   └── DashboardView.tsx
+│   │   ├── landing/
+│   │   │   └── LandingHero.tsx
+│   │   ├── layout/
+│   │   │   └── Navbar.tsx
+│   │   ├── reports/
+│   │   │   └── ReportsView.tsx
+│   │   ├── scanner/
+│   │   │   └── TransactionScannerView.tsx
+│   │   ├── settings/
+│   │   │   └── SettingsView.tsx
+│   │   ├── ui/
+│   │   │   ├── AnimatedNumber.tsx
+│   │   │   ├── AnimatedText.tsx
+│   │   │   ├── BackgroundCanvas.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── CustomCursor.tsx
+│   │   │   ├── GlowCard.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── RiskGauge.tsx
+│   │   │   ├── TextShimmer.tsx
+│   │   │   ├── Toast.tsx
+│   │   │   ├── animated-shader-background.tsx
+│   │   │   ├── button.tsx
+│   │   │   ├── dotted-surface.tsx
+│   │   │   ├── header-2.tsx
+│   │   │   ├── menu-toggle-icon.tsx
+│   │   │   ├── pixel-perfect-hero.tsx
+│   │   │   └── use-scroll.ts
+│   │   └── wallet/
+│   │       ├── ConnectWalletModal.tsx
+│   │       └── WalletHealthView.tsx
+│   ├── lib/
+│   │   └── utils.ts
+│   ├── public/
+│   │   └── public/
 │   │       └── .gitkeep
-│   └── public/
-│       └── .gitkeep
+│   ├── store/
+│   │   └── useSentinelStore.ts
+│   └── types/
+│       └── sentinel.ts
 ├── backend/
 │   ├── .env.local
 │   ├── package.json
@@ -48,14 +103,17 @@
 │   │   ├── scamDetectionAgent.ts
 │   │   ├── riskAnalyzer.ts
 │   │   └── contractInspector.ts
-│   └── lib/
-│       ├── db/
-│       │   └── supabase.ts
-│       ├── okx/
-│       │   └── walletSdk.ts
-│       ├── xlayer/
-│       │   └── rpcClient.ts
-│       └── utils.ts
+│   ├── lib/
+│   │   ├── db/
+│   │   │   └── supabase.ts
+│   │   ├── okx/
+│   │   │   └── walletSdk.ts
+│   │   ├── xlayer/
+│   │   │   └── rpcClient.ts
+│   │   └── utils.ts
+│   └── scripts/
+│       ├── test-scan.ts
+│       └── test-supabase.ts
 ├── contracts/
 │   ├── src/
 │   │   └── README.md
