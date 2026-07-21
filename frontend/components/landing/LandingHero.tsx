@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { Shield, Scan, Sparkles, Lock, ArrowRight, Activity, Cpu, CheckCircle2, Zap } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
+import { AnimatedText } from '../ui/AnimatedText';
+import { TextShimmer } from '../ui/TextShimmer';
 
 export const LandingHero: React.FC = () => {
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
@@ -32,19 +34,25 @@ export const LandingHero: React.FC = () => {
           className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-md"
         >
           <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
-          <span className="text-[11px] sm:text-xs font-bold text-primary tracking-wide uppercase">
+          <TextShimmer className="text-[11px] sm:text-xs font-bold tracking-wide uppercase" duration={2.5}>
             REAL-TIME AI PRE-SIGN PROTECTION
-          </span>
+          </TextShimmer>
         </motion.div>
 
         {/* Centralized Main Title */}
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
           className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white tracking-tight leading-[1.04] max-w-4xl text-center"
         >
-          Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-amber-500 text-glow-red">AI Shield</span> Against Crypto Scams
+          <AnimatedText text="Your" as="span" stagger={0.08} delay={0.15} once={false} />{' '}
+          <AnimatedText as="span" delay={0.3} once={false}>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-red-500 to-amber-500 text-glow-red">
+              AI Shield
+            </span>
+          </AnimatedText>{' '}
+          <AnimatedText text="Against Crypto Scams" as="span" stagger={0.08} delay={0.45} once={false} />
         </motion.h1>
 
         {/* Centralized Description */}

@@ -1,20 +1,36 @@
 import type { Metadata } from 'next';
-import { Inter, Space_Grotesk } from 'next/font/google';
+import { Inter, JetBrains_Mono } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { DottedSurface } from '../components/ui/dotted-surface';
 import { CustomCursor } from '../components/ui/CustomCursor';
 import { ToastContainer } from '../components/ui/Toast';
 import { ConnectWalletModal } from '../components/wallet/ConnectWalletModal';
 
+// Body / UI — invisible, screen-optimized workhorse (matches Rabby, revoke.cash body)
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
+// Display / headings — Audex, a distinctive display face (local, self-hosted).
+// Only Regular + Italic ship, so we map the Regular file across the weight range
+// and let the browser synthesize heavier weights used by font-bold/font-black.
+const audex = localFont({
+  src: [
+    { path: './fonts/Audex-Regular.ttf', weight: '400', style: 'normal' },
+    { path: './fonts/Audex-Italic.ttf', weight: '400', style: 'italic' },
+  ],
+  variable: '--font-audex',
+  display: 'swap',
+});
+
+// On-chain data — addresses, hashes, risk scores (security-platform standard)
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-space-grotesk',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jetbrains-mono',
   display: 'swap',
 });
 
@@ -29,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable} font-sans`}>
+    <html lang="en" className={`dark ${inter.variable} ${audex.variable} ${jetbrainsMono.variable} font-sans`}>
       <body className="bg-[#050505] text-white min-h-screen flex flex-col justify-between selection:bg-primary selection:text-white antialiased">
         <DottedSurface />
         <CustomCursor />
