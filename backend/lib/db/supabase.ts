@@ -1,1 +1,1 @@
-export const supabaseClient = {};\n
+﻿export const supabaseClient = {};

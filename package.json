@@ -1,7 +1,10 @@
 {
   "name": "sentinel",
   "private": true,
-  "workspaces": ["frontend", "backend"],
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "npm --workspace frontend run dev"
   }
