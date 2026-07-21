@@ -1,4 +1,4 @@
-# 🛡️ ScamGuard AI
+# 🛡️ Sentinel
 
 > **Your AI Shield Against Crypto Scams**
 >
@@ -8,11 +8,11 @@
 
 ## 📖 Overview
 
-**ScamGuard AI** is an intelligent **Agent Service Provider (ASP)** developed for the **OKX.AI Genesis Hackathon**.
+**Sentinel** is an intelligent **Agent Service Provider (ASP)** developed for the **OKX.AI Genesis Hackathon**.
 
 The platform acts as a personal on-chain security assistant, analyzing every transaction before it is signed. By inspecting smart contracts, wallet interactions, token risks, approvals, and known scam patterns, ScamGuard AI helps users avoid phishing attacks, rug pulls, malicious contracts, and wallet-draining exploits.
 
-Instead of expecting users to understand complex blockchain data, ScamGuard AI explains risks in simple language and recommends the safest action.
+Instead of expecting users to understand complex blockchain data, Sentinel explains risks in simple language and recommends the safest action.
 
 ## ✨ Features
 
@@ -28,7 +28,7 @@ Instead of expecting users to understand complex blockchain data, ScamGuard AI e
 
 1. Connect your **OKX Wallet**.
 2. Initiate a transaction.
-3. ScamGuard AI analyzes contracts, wallets, tokens, permissions, liquidity, and known scam patterns.
+3. Sentinel analyzes contracts, wallets, tokens, permissions, liquidity, and known scam patterns.
 4. Receive an instant risk score and recommendation.
 5. Proceed safely or cancel.
 
