@@ -103,7 +103,7 @@ scamguard-ai/
 
 ## 🤝 Contributing
 
-Fork → Create Branch → Commit → Pull Request.
+Commit → Pull Request.
 
 ## 📜 License
 
