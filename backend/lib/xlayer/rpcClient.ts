@@ -28,7 +28,7 @@ import {
 const isTestnet = process.env.X_LAYER_NETWORK === "testnet";
 
 export const xLayer = defineChain({
-  id: isTestnet ? 195 : 196,
+  id: isTestnet ? 1952 : 196,
   name: isTestnet ? "X Layer Testnet" : "X Layer",
   nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
   rpcUrls: {

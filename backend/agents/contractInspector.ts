@@ -43,7 +43,7 @@ const MAX_UINT256 = 2n ** 256n - 1n;
 export async function inspectContract(
   tx: TransactionRequestInput
 ): Promise<ContractInspectionResult> {
-  if (!isAddress(tx.to)) {
+  if (!isAddress(tx.to, { strict: false })) {
     throw new Error(`Invalid target address: ${tx.to}`);
   }
 
