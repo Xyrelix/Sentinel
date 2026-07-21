@@ -26,9 +26,9 @@ export default {
         danger: '#EF4444',
       },
       fontFamily: {
-        sans: ['Inter', 'var(--font-inter)', 'sans-serif'],
-        heading: ['Space Grotesk', 'var(--font-space-grotesk)', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['var(--font-inter)', 'Inter', 'sans-serif'],
+        heading: ['var(--font-audex)', 'Audex', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'JetBrains Mono', 'monospace'],
       },
       animation: {
         'scanline': 'scanline 3s linear infinite',
