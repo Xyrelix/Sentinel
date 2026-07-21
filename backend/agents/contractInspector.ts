@@ -14,6 +14,7 @@ import {
   type TransactionRequestInput,
 } from "../lib/xlayer/rpcClient";
 import type { ContractFlag, ContractInspectionResult } from "@shared/types";
+import { isUnlimitedAmount } from "../lib/utils";
 
 // Minimum bytecode size (in bytes) below which we treat a "contract" as
 // suspicious — most real ERC20/ERC721 contracts are well over this.
@@ -32,9 +33,6 @@ const ERC20_APPROVE_ABI = [
     outputs: [{ name: "", type: "bool" }],
   },
 ] as const;
-
-// 2^256 - 1 — the amount used for "unlimited" ERC20 approvals.
-const MAX_UINT256 = 2n ** 256n - 1n;
 
 /**
  * Inspects the target of an unsigned transaction and returns raw findings.
@@ -72,7 +70,7 @@ export async function inspectContract(
         data: tx.data,
       });
       const [, amount] = decoded.args as [Address, bigint];
-      if (amount === MAX_UINT256) {
+      if (isUnlimitedAmount(amount)) {
         flags.push("unlimited-approval-requested");
       }
     } catch {
