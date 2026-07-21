@@ -48,22 +48,27 @@ Instead of expecting users to understand complex blockchain data, Sentinel expla
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/yourusername/scamguard-ai.git
-cd scamguard-ai
+git clone https://github.com/yourusername/sentinel.git
+cd sentinel
 npm install
 ```
 
-Create a `.env.local` file:
+Create environment files for the frontend and backend:
 
 ```env
-NEXT_PUBLIC_OKX_WALLET_KEY=your_okx_wallet_key
-X_LAYER_RPC_URL=your_rpc_url
-OPENAI_API_KEY=your_openai_api_key
-SUPABASE_URL=
-SUPABASE_ANON_KEY=
+# frontend/.env.local
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+
+# backend/.env.local
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+OKX_WALLET_API_KEY=
+OKX_WALLET_SECRET=
+X_LAYER_RPC_URL=
 ```
 
-Run:
+Run the app from the workspace root:
 
 ```bash
 npm run dev
@@ -74,14 +79,25 @@ Open http://localhost:3000
 ## 📂 Project Structure
 
 ```text
-scamguard-ai/
-├── app/
-├── components/
-├── agents/
-├── contracts/
-├── lib/
-├── public/
-├── package.json
+sentinel/
+├── frontend/                     # Next.js app, routes, UI components
+│   ├── app/
+│   │   ├── api/
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
+│   │   └── globals.css
+│   ├── components/
+│   ├── public/
+│   ├── package.json
+│   └── .env.local
+├── backend/                      # API handlers, agents, and service wrappers
+│   ├── api/
+│   ├── agents/
+│   └── lib/
+├── contracts/                    # Solidity smart contracts
+├── shared/                       # Shared types used by frontend + backend
+├── .env.example
+├── .gitignore
 └── README.md
 ```
 
