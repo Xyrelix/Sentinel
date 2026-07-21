@@ -1,1 +1,1 @@
-export const okxWalletSdk = {};\n
+﻿export const okxWalletSdk = {};

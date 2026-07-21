@@ -1,1 +1,6 @@
-export async function scanTransaction(payload: Record<string, unknown>) {\n  return { ok: true, payload, status: 'scanned' };\n}\n
+﻿import { scanTransaction as runScamDetection } from "../agents/scamDetectionAgent";
+import type { TransactionRequestInput } from "../lib/xlayer/rpcClient";
+
+export async function scanTransaction(tx: TransactionRequestInput) {
+  return runScamDetection(tx);
+}

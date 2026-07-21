@@ -1,1 +1,3 @@
-export async function getWalletHealth() {\n  return { ok: true, status: 'healthy', risk: 18 };\n}\n
+﻿export async function getWalletHealth() {
+  return { ok: true, status: "healthy", risk: 18 };
+}
