@@ -1,1 +1,1 @@
-export function TransactionScanner() {\n  return <div>Transaction Scanner</div>;\n}\n
+export { TransactionScannerView as TransactionScanner } from './scanner/TransactionScannerView';

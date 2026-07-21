@@ -1,3 +1,1 @@
-export function ApprovalRevoke() {
-  return <div>Approval Revoke</div>;
-}
+export { ApprovalManagerView as ApprovalRevoke } from '../approvals/ApprovalManagerView';

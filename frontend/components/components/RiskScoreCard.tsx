@@ -1,3 +1,1 @@
-export function RiskScoreCard() {
-  return <div>Risk Score Card</div>;
-}
+export { RiskGauge as RiskScoreCard } from '../ui/RiskGauge';

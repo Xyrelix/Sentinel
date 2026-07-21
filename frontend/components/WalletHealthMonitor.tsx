@@ -1,1 +1,1 @@
-export function WalletHealthMonitor() {\n  return <div>Wallet Health Monitor</div>;\n}\n
+export { WalletHealthView as WalletHealthMonitor } from './wallet/WalletHealthView';
