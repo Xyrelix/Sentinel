@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Shield, Wallet, ChevronRight } from 'lucide-react';
+import { Wallet, ChevronRight } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { useScroll } from '@/components/ui/use-scroll';
@@ -86,11 +86,11 @@ export function Navbar() {
           onClick={() => handleNavClick('landing')}
           className="flex items-center gap-2.5 group focus:outline-none"
         >
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-red-700 shadow-red-glow group-hover:scale-105 transition-transform">
-            <Shield className="w-4 h-4 text-white" />
+          <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-black/40 border border-primary/30 shadow-red-glow group-hover:scale-105 transition-transform overflow-hidden">
+            <img src="/logo.png" alt="Sentinel Logo" className="w-6 h-6 object-contain" />
           </div>
           <div className="flex flex-col text-left">
-            <span className="text-sm font-black tracking-wider text-white group-hover:text-primary transition-colors flex items-center gap-1.5 leading-none">
+            <span className="text-sm font-heading font-black tracking-wider text-white group-hover:text-primary transition-colors flex items-center gap-1.5 leading-none">
               SENTINEL <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/30 uppercase">AI</span>
             </span>
           </div>

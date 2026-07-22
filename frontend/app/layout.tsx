@@ -31,6 +31,9 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Sentinel | Web3 AI Security & Anti-Scam Shield',
   description: 'AI-powered blockchain security assistant. Analyzes transactions before signing, explaining risks in plain English.',
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({
@@ -49,7 +52,8 @@ export default function RootLayout({
         {/* Global Footer */}
         <footer className="relative z-10 border-t border-[#1E1E1E] bg-[#050505]/90 py-8 text-xs text-accent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="Sentinel Logo" className="w-4 h-4 object-contain" />
               <span className="font-bold text-white tracking-wider">SENTINEL AI</span>
               <span>— Next-Gen Web3 AI Security Shield</span>
             </div>
