@@ -261,7 +261,7 @@ export const WalletHealthView: React.FC = () => {
                       color: '#ffffff',
                     }}
                   />
-                </PieChart>
+                </RechartsPieChart>
               </ResponsiveContainer>
             </div>
 
