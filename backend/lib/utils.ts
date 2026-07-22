@@ -29,3 +29,13 @@ export function isLikelyDomain(value: string): boolean {
   const stripped = trimmed.replace(/^https?:\/\//, "").split("/")[0];
   return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/.test(stripped);
 }
+
+/**
+ * Checks for an ENS name (vitalik.eth) - checked before isLikelyDomain in
+ * api/scan.ts, since a .eth name would otherwise match that domain-shape
+ * regex too and get misrouted to the phishing-site pipeline instead of
+ * being resolved to a real address and scanned properly.
+ */
+export function isEnsName(value: string): boolean {
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.eth$/i.test(value.trim());
+}

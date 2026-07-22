@@ -9,10 +9,12 @@
 
 import { decodeFunctionData, isAddress, type Address } from "viem";
 import {
-  getContractInfo,
-  simulateTransaction,
+  getContractInfoForChain,
+  simulateTransactionForChain,
+  isSupportedChain,
+  getChainName,
   type TransactionRequestInput,
-} from "../lib/xlayer/rpcClient";
+} from "../lib/rpc/multiChain";
 import type { ContractFlag, ContractInspectionResult } from "@shared/types";
 import { isUnlimitedAmount } from "../lib/utils";
 import { checkAddressSecurity, checkTokenSecurity } from "../lib/goplus";
@@ -21,6 +23,8 @@ import { checkChainabuseAddress } from "../lib/chainabuse";
 // Minimum bytecode size (in bytes) below which we treat a "contract" as
 // suspicious - most real ERC20/ERC721 contracts are well over this.
 const SUSPICIOUS_BYTECODE_THRESHOLD = 32;
+
+const DEFAULT_CHAIN_ID = 196; // X Layer - this app's main/default chain.
 
 // Minimal ABI fragment for detecting ERC20 approve() calls in tx.data.
 const ERC20_APPROVE_ABI = [
@@ -40,40 +44,51 @@ const ERC20_APPROVE_ABI = [
  * Inspects the target of an unsigned transaction and returns raw findings.
  * Never broadcasts anything - only reads on-chain state and simulates.
  *
- * NOTE on multichain scope: bytecode/simulation checks below always run
- * against X Layer (the only chain this backend has an RPC client for) -
- * that's a real infrastructure boundary, not something chainId can change.
- * The GoPlus/Chainabuse threat-intel checks, however, are plain external
- * API lookups with no such constraint, so chainId is threaded through to
- * those specifically - pass the actual chain the target address lives on
- * (e.g. the connected wallet's current chain) for a correct match.
+ * Multichain: bytecode/simulation checks now run against whichever chain
+ * chainId identifies (defaults to X Layer), using lib/rpc/multiChain.ts's
+ * registry of public RPC endpoints. If a chain isn't in that registry,
+ * on-chain checks are skipped gracefully (noted in externalFindings) rather
+ * than failing the whole scan - GoPlus/Chainabuse threat-intel, which cover
+ * far more chains than we have our own RPC access to, still run normally.
  */
 export async function inspectContract(
   tx: TransactionRequestInput,
-  chainId?: string | number
+  chainIdInput?: string | number
 ): Promise<ContractInspectionResult> {
   if (!isAddress(tx.to, { strict: false })) {
     throw new Error(`Invalid target address: ${tx.to}`);
   }
 
+  const chainId = Number(chainIdInput) || DEFAULT_CHAIN_ID;
   const flags: ContractFlag[] = [];
+  const externalFindings: string[] = [];
 
-  // 1. Bytecode check
-  const contractInfo = await getContractInfo(tx.to as Address);
-  if (!contractInfo.isContract) {
-    flags.push("not-a-contract");
-  } else if (contractInfo.bytecodeSize < SUSPICIOUS_BYTECODE_THRESHOLD) {
-    flags.push("empty-bytecode");
-  }
+  let contractInfo = { isContract: false, bytecodeSize: 0 };
+  let simulation: { success: boolean; revertReason?: string } = { success: true };
 
-  // 2. Simulation check - does the call revert before it's ever signed?
-  const simulation = await simulateTransaction(tx);
-  if (!simulation.success) {
-    flags.push("simulation-reverted");
+  if (isSupportedChain(chainId)) {
+    // 1. Bytecode check
+    contractInfo = await getContractInfoForChain(tx.to as Address, chainId);
+    if (!contractInfo.isContract) {
+      flags.push("not-a-contract");
+    } else if (contractInfo.bytecodeSize < SUSPICIOUS_BYTECODE_THRESHOLD) {
+      flags.push("empty-bytecode");
+    }
+
+    // 2. Simulation check - does the call revert before it's ever signed?
+    simulation = await simulateTransactionForChain(tx, chainId);
+    if (!simulation.success) {
+      flags.push("simulation-reverted");
+    }
+  } else {
+    externalFindings.push(
+      `On-chain bytecode and simulation checks were skipped - no RPC endpoint configured for ${getChainName(chainId)} (chain ${chainId}).`
+    );
   }
 
   // 3. Unlimited-approval detection - decode tx.data if it matches
-  // ERC20 approve(spender, amount) and check for max uint256.
+  // ERC20 approve(spender, amount) and check for max uint256. Chain-agnostic
+  // - just decodes the calldata itself, no RPC needed.
   if (tx.data && tx.data !== "0x") {
     try {
       const decoded = decodeFunctionData({
@@ -92,8 +107,6 @@ export async function inspectContract(
   // 4. Real-world threat intelligence via GoPlus Security - best-effort.
   // GoPlus downtime or rate-limiting should never break a scan; on failure
   // we simply proceed without this signal.
-  const externalFindings: string[] = [];
-
   try {
     const addressCheck = await checkAddressSecurity(tx.to, chainId);
     if (addressCheck.isMalicious) {

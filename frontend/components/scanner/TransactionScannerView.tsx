@@ -45,7 +45,7 @@ export const TransactionScannerView: React.FC = () => {
       <GlowCard className="p-6">
         <div className="space-y-4">
           <label className="text-xs font-bold text-accent uppercase tracking-wider block">
-            Contract Address, Transaction Payload, or Domain Name:
+            Contract/Wallet Address, ENS Name, Domain, or Transaction Payload:
           </label>
 
           <div className="flex flex-col sm:flex-row gap-3">
@@ -54,7 +54,7 @@ export const TransactionScannerView: React.FC = () => {
                 type="text"
                 value={currentScanInput}
                 onChange={(e) => setCurrentScanInput(e.target.value)}
-                placeholder="Paste contract address (0x...) or domain"
+                placeholder='0x..., vitalik.eth, domain.com, or {"to":"0x...","data":"0x..."}'
                 className="w-full px-4 py-3.5 rounded-xl bg-[#080808] border border-[#1E1E1E] focus:border-primary focus:outline-none text-white text-sm font-mono placeholder:text-white/30"
               />
               <Icon name="terminal" color="%23A1A1AA" className="absolute right-4 top-4 w-4 h-4" />
@@ -84,6 +84,12 @@ export const TransactionScannerView: React.FC = () => {
           {scanError && (
             <p className="text-xs text-primary font-semibold pt-1">{scanError}</p>
           )}
+
+          <p className="text-[11px] text-accent/60">
+            Advanced: paste a full transaction payload as JSON (e.g.{' '}
+            <code className="font-mono">{'{"to":"0x...","data":"0x...","value":"0","chainId":1}'}</code>) to scan real
+            calldata, not just the target address.
+          </p>
 
           {/* Preset Buttons - instant scripted demo scenarios */}
           <div className="flex flex-wrap items-center gap-2 pt-2">

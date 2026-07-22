@@ -12,6 +12,8 @@ import {
   shortenAddress,
   isValidAddress,
   isValidDomain,
+  isEnsName,
+  resolveEnsNameClient,
   getNativeTokenPriceUsd,
   getChainMeta,
   refreshBalance,
@@ -120,14 +122,18 @@ function findingToRiskLevel(finding: ScanFinding): ScanResult['riskLevel'] {
   return 'SAFE';
 }
 
-function buildRealScanResult(address: string, finding: ScanFinding): ScanResult {
+function buildRealScanResult(address: string, finding: ScanFinding, resolvedFrom?: string): ScanResult {
   const riskLevel = findingToRiskLevel(finding);
   const safe = finding.label === 'safe';
 
   return {
     id: `scan-${address.toLowerCase()}`,
     targetAddress: address,
-    targetName: finding.isContract ? 'Smart Contract' : 'Externally Owned Account',
+    targetName: resolvedFrom
+      ? `${resolvedFrom} (resolved via ENS)`
+      : finding.isContract
+      ? 'Smart Contract'
+      : 'Externally Owned Account',
     network: 'OKX X Layer',
     riskScore: finding.score,
     riskLevel,
@@ -154,7 +160,9 @@ function buildRealScanResult(address: string, finding: ScanFinding): ScanResult 
       },
     ],
     aiExplanation: {
-      whatWeFound: finding.reasons.join(' '),
+      whatWeFound: (resolvedFrom ? [`Resolved ENS name "${resolvedFrom}" to ${address}.`] : [])
+        .concat(finding.reasons)
+        .join(' '),
       whyItMatters: safe
         ? 'No high-risk code patterns were detected from on-chain inspection.'
         : 'The findings above are common indicators of scam or unsafe contracts.',
@@ -218,13 +226,14 @@ function riskLabelToLevel(label: string): ScanResult['riskLevel'] {
 // unlimited-approval-request detection, not just bytecode presence/size.
 function buildResultFromRiskScore(
   address: string,
-  risk: { score: number; label: string; reasons: string[] }
+  risk: { score: number; label: string; reasons: string[]; resolvedAddress?: string }
 ): ScanResult {
   const safe = risk.label === 'safe';
+  const resolvedAddress = risk.resolvedAddress;
   return {
-    id: `scan-${address.toLowerCase()}`,
-    targetAddress: address,
-    targetName: 'On-Chain Target (Backend Pipeline)',
+    id: `scan-${(resolvedAddress ?? address).toLowerCase()}`,
+    targetAddress: resolvedAddress ?? address,
+    targetName: resolvedAddress ? `${address} (resolved via ENS)` : 'On-Chain Target (Backend Pipeline)',
     network: 'OKX X Layer',
     riskScore: risk.score,
     riskLevel: riskLabelToLevel(risk.label),
@@ -575,17 +584,58 @@ export const useSentinelStore = create<SentinelStore>()(
       return;
     }
 
-    // Freeform input - accepts either a 0x address/contract or a domain/URL.
+    // Freeform input - accepts a 0x address/contract, an ENS name (vitalik.eth),
+    // a domain/URL, or a full transaction-payload JSON object.
     (async () => {
-      const input = get().currentScanInput.trim();
-      const isDomain = !isValidAddress(input) && isValidDomain(input);
+      const rawInput = get().currentScanInput.trim();
+      let input = rawInput;
+      let payloadData: string | undefined;
+      let payloadValue: string | undefined;
+      let payloadChainId: number | undefined;
 
-      if (!isValidAddress(input) && !isDomain) {
-        set({ scanError: 'Enter a valid 0x contract/wallet address, or a domain (e.g. example.com).' });
+      // Transaction-payload mode: {"to":"0x...","data":"0x...","value":"0","chainId":1}
+      // Gives a real calldata-aware scan - unlimited-approval-requested
+      // detection (already built in contractInspector.ts) can only ever fire
+      // when real calldata is provided, which a plain address/domain/ENS
+      // scan never has.
+      if (rawInput.startsWith('{')) {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(rawInput);
+        } catch {
+          set({ scanError: 'Could not parse transaction payload - check the JSON syntax.' });
+          get().addToast({
+            type: 'error',
+            title: 'Invalid JSON',
+            description: 'Could not parse the pasted transaction payload.',
+          });
+          return;
+        }
+        const payload = parsed as Record<string, unknown>;
+        if (typeof payload.to !== 'string') {
+          set({ scanError: 'Transaction payload JSON must include a "to" address.' });
+          get().addToast({
+            type: 'error',
+            title: 'Invalid Payload',
+            description: 'JSON payload must include a "to" field.',
+          });
+          return;
+        }
+        input = payload.to.trim();
+        if (typeof payload.data === 'string') payloadData = payload.data;
+        if (payload.value !== undefined) payloadValue = String(payload.value);
+        if (typeof payload.chainId === 'number') payloadChainId = payload.chainId;
+      }
+
+      const isEns = isEnsName(input);
+      const isDomain = !isEns && !isValidAddress(input) && isValidDomain(input);
+
+      if (!isValidAddress(input) && !isDomain && !isEns) {
+        set({ scanError: 'Enter a valid 0x contract/wallet address, an ENS name (e.g. vitalik.eth), a domain (e.g. example.com), or a transaction payload JSON.' });
         get().addToast({
           type: 'error',
           title: 'Invalid Input',
-          description: 'Please paste a valid 0x address or a domain name.',
+          description: 'Please paste a valid 0x address, ENS name, domain, or JSON payload.',
         });
         return;
       }
@@ -593,22 +643,29 @@ export const useSentinelStore = create<SentinelStore>()(
       set({
         isScanning: true,
         scanProgress: 20,
-        scanStage: isDomain ? 'Checking phishing-site database...' : 'Fetching on-chain bytecode...',
+        scanStage: isEns ? 'Resolving ENS name...' : isDomain ? 'Checking phishing-site database...' : 'Fetching on-chain bytecode...',
         activeScanResult: null,
         scanError: null,
       });
 
-      // Prefer the real backend pipeline (bytecode + simulation + unlimited-approval
-      // + GoPlus real-world threat intel for addresses; phishing-site check for
-      // domains) - falls back to an equivalent client-side check if the backend
-      // isn't reachable/configured (e.g. no X_LAYER_RPC_URL set).
+      // Prefer the real backend pipeline (which resolves ENS names itself, then
+      // runs bytecode + simulation + unlimited-approval + GoPlus real-world
+      // threat intel for addresses; phishing-site check for domains) - falls
+      // back to an equivalent client-side check if the backend isn't
+      // reachable/configured (e.g. no X_LAYER_RPC_URL set).
       try {
         set({ scanProgress: 50, scanStage: 'Running backend AI risk pipeline...' });
         const wallet = get().wallet;
         const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: wallet.address || undefined, to: input, chainId: wallet.chainId }),
+          body: JSON.stringify({
+            from: wallet.address || undefined,
+            to: input,
+            data: payloadData,
+            value: payloadValue,
+            chainId: payloadChainId ?? wallet.chainId,
+          }),
         });
 
         if (res.ok) {
@@ -623,13 +680,34 @@ export const useSentinelStore = create<SentinelStore>()(
           });
           return;
         }
+        if (res.status === 404 && isEns) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error ?? 'ENS_NOT_FOUND');
+        }
         throw new Error('Backend scan unavailable');
-      } catch {
+      } catch (err) {
+        // A confirmed "ENS name not registered" is a real answer, not a
+        // fallback trigger - surface it directly instead of falling through
+        // to a client-side check that would just fail the same way.
+        if (err instanceof Error && err.message.includes('Could not resolve ENS')) {
+          set({ isScanning: false, scanProgress: 0, scanStage: 'Scan Failed', scanError: err.message });
+          get().addToast({ type: 'error', title: 'ENS Name Not Found', description: err.message });
+          return;
+        }
         // fall through to client-side check below
       }
 
       try {
-        if (isDomain) {
+        let scanTarget = input;
+        let resolvedFrom: string | undefined;
+
+        if (isEns) {
+          set({ scanProgress: 55, scanStage: 'Resolving ENS name directly...' });
+          const resolved = await resolveEnsNameClient(input);
+          if (!resolved) throw new Error('ENS_NOT_FOUND');
+          resolvedFrom = input;
+          scanTarget = resolved;
+        } else if (isDomain) {
           set({ scanProgress: 60, scanStage: 'Checking GoPlus phishing-site database directly...' });
           const finding = await scanDomain(input);
           const result = buildDomainScanResult(input, finding);
@@ -643,8 +721,8 @@ export const useSentinelStore = create<SentinelStore>()(
         }
 
         set({ scanProgress: 60, scanStage: 'Analyzing contract code directly via wallet RPC...' });
-        const finding = await scanAddress(input);
-        const result = buildRealScanResult(input, finding);
+        const finding = await scanAddress(scanTarget);
+        const result = buildRealScanResult(scanTarget, finding, resolvedFrom);
 
         set({
           isScanning: false,
@@ -664,12 +742,22 @@ export const useSentinelStore = create<SentinelStore>()(
           isScanning: false,
           scanProgress: 0,
           scanStage: 'Scan Failed',
-          scanError: code === 'NO_WALLET' ? 'Connect a wallet to run an address scan.' : 'Scan failed. Try again.',
+          scanError:
+            code === 'NO_WALLET'
+              ? 'Connect a wallet to run an address scan.'
+              : code === 'ENS_NOT_FOUND'
+              ? `Could not resolve ENS name "${input}" - it may not be registered.`
+              : 'Scan failed. Try again.',
         });
         get().addToast({
           type: 'error',
-          title: 'Scan Failed',
-          description: code === 'NO_WALLET' ? 'Connect a wallet first.' : 'Could not complete the scan.',
+          title: code === 'ENS_NOT_FOUND' ? 'ENS Name Not Found' : 'Scan Failed',
+          description:
+            code === 'NO_WALLET'
+              ? 'Connect a wallet first.'
+              : code === 'ENS_NOT_FOUND'
+              ? `"${input}" does not appear to be registered.`
+              : 'Could not complete the scan.',
         });
       }
     })();

@@ -257,6 +257,26 @@ export function isValidDomain(value: string): boolean {
   return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/.test(stripped);
 }
 
+/**
+ * Checks for an ENS name (vitalik.eth) - must be checked before
+ * isValidDomain, since a .eth name matches that domain-shape regex too and
+ * would otherwise get misrouted to the phishing-site check instead of
+ * being resolved to a real address.
+ */
+export function isEnsName(value: string): boolean {
+  return /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.eth$/i.test(value.trim());
+}
+
+const ENS_RESOLVE_BASE = 'https://api.ensideas.com/ens/resolve';
+
+/** Resolves a .eth name to its registered address via ENSIdeas's public API - no wallet or RPC needed. Returns null if unregistered. */
+export async function resolveEnsNameClient(name: string): Promise<string | null> {
+  const res = await fetch(`${ENS_RESOLVE_BASE}/${encodeURIComponent(name)}`);
+  if (!res.ok) throw new Error('ENS_RESOLUTION_FAILED');
+  const data = await res.json();
+  return data?.address ?? null;
+}
+
 export function formatEther(wei: bigint, decimals = 4): string {
   const negative = wei < 0n;
   const abs = negative ? -wei : wei;

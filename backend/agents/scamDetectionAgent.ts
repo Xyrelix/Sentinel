@@ -12,7 +12,7 @@ import { analyzeRisk } from "./riskAnalyzer";
 import { checkPhishingSite } from "../lib/goplus";
 import { checkEthPhishingList } from "../lib/phishingList";
 import type { RiskScore } from "@shared/types";
-import type { TransactionRequestInput } from "../lib/xlayer/rpcClient";
+import type { TransactionRequestInput } from "../lib/rpc/multiChain";
 
 /**
  * Runs the full pre-signature scam-detection pipeline on an unsigned
