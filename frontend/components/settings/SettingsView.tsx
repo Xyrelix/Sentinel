@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Settings, Shield, Bell, Cpu, MousePointer, Sliders } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
+import { Icon } from '../ui/Icon';
 
 export const SettingsView: React.FC = () => {
   const customCursorEnabled = useSentinelStore((state) => state.customCursorEnabled);
@@ -38,7 +38,7 @@ export const SettingsView: React.FC = () => {
         {/* AI Scanning Preferences */}
         <GlowCard className="p-6 space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-[#1E1E1E]">
-            <Cpu className="w-5 h-5 text-primary" />
+            <Icon name="cpu" color="%23FF3B30" className="w-5 h-5" />
             <h3 className="text-base font-bold text-white">AI Scanner Configuration</h3>
           </div>
 
@@ -80,7 +80,7 @@ export const SettingsView: React.FC = () => {
         {/* Visual & UX Controls */}
         <GlowCard className="p-6 space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-[#1E1E1E]">
-            <MousePointer className="w-5 h-5 text-accent" />
+            <Icon name="mouse-pointer" color="%23A1A1AA" className="w-5 h-5" />
             <h3 className="text-base font-bold text-white">Visual & Motion FX</h3>
           </div>
 
@@ -107,7 +107,7 @@ export const SettingsView: React.FC = () => {
         {/* OKX RPC Endpoint */}
         <GlowCard className="p-6 space-y-4">
           <div className="flex items-center gap-3 pb-2">
-            <Sliders className="w-5 h-5 text-warning" />
+            <Icon name="sliders" color="%23FACC15" className="w-5 h-5" />
             <h3 className="text-base font-bold text-white">OKX X Layer RPC Endpoint</h3>
           </div>
 

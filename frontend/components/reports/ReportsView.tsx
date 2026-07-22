@@ -2,10 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Download, ShieldCheck, CheckCircle2, Award, Zap, ExternalLink } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
 import { Badge } from '../ui/Badge';
+import { Icon } from '../ui/Icon';
 
 export const ReportsView: React.FC = () => {
   const wallet = useSentinelStore((state) => state.wallet);
@@ -40,7 +40,7 @@ export const ReportsView: React.FC = () => {
           onClick={handleExportPdf}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-xs shadow-red-glow hover:shadow-red-glow-lg transition-all"
         >
-          <Download className="w-4 h-4" />
+          <Icon name="download" className="w-4 h-4" />
           <span>Export Audit PDF Report</span>
         </button>
       </div>
@@ -48,14 +48,14 @@ export const ReportsView: React.FC = () => {
       {/* Main Certificate Card Preview */}
       <GlowCard className="p-8 border-primary/30 relative overflow-hidden">
         {/* Background Decorative Shield Watermark */}
-        <Award className="absolute -right-10 -bottom-10 w-96 h-96 text-white/5 pointer-events-none" />
+        <Icon name="award" color="%23ffffff0d" className="absolute -right-10 -bottom-10 w-96 h-96 pointer-events-none" />
 
         <div className="relative z-10 space-y-6">
           {/* Certificate Top Badge Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#1E1E1E]">
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-2xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary shadow-red-glow">
-                <ShieldCheck className="w-8 h-8" />
+                <Icon name="shield-check" color="%23FF3B30" className="w-8 h-8" />
               </div>
               <div>
                 <span className="text-xs uppercase tracking-widest text-primary font-black block">
@@ -96,7 +96,7 @@ export const ReportsView: React.FC = () => {
           {/* Executive Summary */}
           <div className="p-5 rounded-2xl bg-[#080808] border border-[#1E1E1E] space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-              <Zap className="w-4 h-4 text-primary" /> Executive Threat Summary:
+              <Icon name="zap" color="%23FF3B30" className="w-4 h-4" /> Executive Threat Summary:
             </h4>
             <p className="text-xs text-accent leading-relaxed">
               {activeScanResult
@@ -110,19 +110,19 @@ export const ReportsView: React.FC = () => {
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Verification Steps Completed:</h4>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
+                <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4" />
                 <span>Bytecode Hash Matching & Decompilation</span>
               </div>
               <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
+                <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4" />
                 <span>Permit2 Signature Payload Inspection</span>
               </div>
               <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
+                <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4" />
                 <span>Liquidity Pool Lock Protocol Verification</span>
               </div>
               <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
+                <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4" />
                 <span>OKX X Layer Telemetry Database Check</span>
               </div>
             </div>

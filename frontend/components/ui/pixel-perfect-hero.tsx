@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Icon } from "./Icon";
 
 const GithubIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -403,7 +403,7 @@ export function PixelHero({
         <button onClick={onPrimaryClick} className="relative inline-flex h-10 md:h-12 items-center justify-center gap-1.5 md:gap-2 rounded-xl bg-gradient-to-b from-primary/90 to-primary px-4 md:px-8 text-xs md:text-sm font-semibold text-primary-foreground shadow-[inset_0_1px_1px_rgba(255,255,255,0.3),0_2px_4px_rgba(0,0,0,0.15),0_12px_24px_rgba(0,0,0,0.15)] ring-1 ring-primary/20 transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
           <span className="inline md:hidden">{primaryCtaMobile}</span>
           <span className="hidden md:inline">{primaryCta}</span>
-          <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4" />
+          <Icon name="arrow-right" className="w-3.5 h-3.5 md:w-4 md:h-4" />
         </button>
         <a href={githubUrl} target="_blank" rel="noopener noreferrer" onClick={onSecondaryClick} className="relative inline-flex h-10 md:h-12 items-center justify-center gap-1.5 md:gap-2 rounded-xl bg-gradient-to-b from-card/80 to-card px-4 md:px-8 text-xs md:text-sm font-semibold text-card-foreground shadow-[inset_0_1px_1px_rgba(255,255,255,0.1),0_2px_4px_rgba(0,0,0,0.05),0_12px_24px_rgba(0,0,0,0.05)] ring-1 ring-border/50 backdrop-blur-md transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
           <GithubIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />

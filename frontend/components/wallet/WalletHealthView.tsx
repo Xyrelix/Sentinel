@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Wallet, ShieldCheck, ArrowUpRight, Cpu } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
 import { Badge } from '../ui/Badge';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
+import { Icon } from '../ui/Icon';
 
 export const WalletHealthView: React.FC = () => {
   const wallet = useSentinelStore((state) => state.wallet);
@@ -30,7 +30,7 @@ export const WalletHealthView: React.FC = () => {
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111111] border border-primary/40 hover:border-primary text-white font-bold text-xs hover:bg-primary/10 transition-all"
         >
           <span>Scan a Contract</span>
-          <ArrowUpRight className="w-4 h-4 text-primary" />
+          <Icon name="arrow-up-right" color="%23FF3B30" className="w-4 h-4" />
         </button>
       </div>
 
@@ -46,7 +46,7 @@ export const WalletHealthView: React.FC = () => {
               <p className="text-xs text-accent mt-1">Gas token on {wallet.network || 'X Layer'}</p>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white">
-              <Wallet className="w-5 h-5" />
+              <Icon name="wallet" className="w-5 h-5" />
             </div>
           </div>
         </GlowCard>
@@ -59,7 +59,7 @@ export const WalletHealthView: React.FC = () => {
               <p className="text-xs text-accent mt-1">Connected chain</p>
             </div>
             <div className="p-3 rounded-xl bg-success/10 border border-success/30 text-success">
-              <ShieldCheck className="w-5 h-5" />
+              <Icon name="shield-check" color="%2322C55E" className="w-5 h-5" />
             </div>
           </div>
         </GlowCard>
@@ -72,7 +72,7 @@ export const WalletHealthView: React.FC = () => {
               <p className="text-xs text-accent mt-1">Your active account</p>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white">
-              <Cpu className="w-5 h-5" />
+              <Icon name="cpu" className="w-5 h-5" />
             </div>
           </div>
         </GlowCard>
@@ -81,7 +81,7 @@ export const WalletHealthView: React.FC = () => {
       {/* Note on scope */}
       <GlowCard className="p-6">
         <div className="flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+          <Icon name="shield-check" color="%23FF3B30" className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
             <h3 className="text-sm font-bold text-white">Token approvals &amp; portfolio history</h3>
             <p className="text-xs text-accent mt-1 leading-relaxed">
