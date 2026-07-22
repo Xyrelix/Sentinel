@@ -1,7 +1,10 @@
 export type NavTab =
   | 'landing'
+  | 'dashboard'
   | 'scanner'
   | 'wallet'
+  | 'approvals'
+  | 'community'
   | 'reports'
   | 'settings';
 
@@ -41,6 +44,7 @@ export interface ApprovalItem {
   tokenSymbol: string;
   tokenName: string;
   tokenIcon?: string;
+  tokenAddress?: string; // present for real (backend-sourced) approvals — required to build a revoke tx
   allowance: string; // e.g. "Unlimited" or "10,000 USDT"
   isUnlimited: boolean;
   spenderAddress: string;
@@ -75,7 +79,9 @@ export interface WalletState {
   address: string;
   ensName?: string;
   network: string;
+  chainId?: number;
   balanceEth: number;
   balanceUsd: number;
   overallRiskScore: number;
+  isVerified?: boolean; // true once the nonce-signature ownership check has succeeded
 }

@@ -32,6 +32,24 @@ export function getChainMeta(chainId: number): ChainMeta {
 }
 
 // ---------------------------------------------------------------------------
+// Live native-token price
+// ---------------------------------------------------------------------------
+//
+// Goes through our own /api/price route rather than calling CoinGecko
+// directly — the CoinGecko API key (raises rate limits above the public
+// anonymous tier) lives server-side only and must never reach the browser
+// bundle.
+
+/** Fetches the live USD price of a chain's native token via /api/price. Throws on failure — callers should treat this as best-effort. */
+export async function getNativeTokenPriceUsd(chainId: number): Promise<number> {
+  const res = await fetch(`/api/price?chainId=${chainId}`);
+  if (!res.ok) throw new Error('PRICE_FETCH_FAILED');
+  const data = await res.json();
+  if (typeof data?.price !== 'number') throw new Error('PRICE_FETCH_FAILED');
+  return data.price;
+}
+
+// ---------------------------------------------------------------------------
 // Multi-wallet discovery (EIP-6963 + legacy injected fallbacks)
 // ---------------------------------------------------------------------------
 
@@ -185,6 +203,37 @@ export async function refreshBalance(address: string): Promise<bigint> {
     params: [address, 'latest'],
   });
   return BigInt(balanceHex);
+}
+
+/** Signs a plain-text message with `personal_sign` — used for the nonce-based auth handshake. */
+export async function signMessage(address: string, message: string): Promise<`0x${string}`> {
+  const provider = getInjectedProvider();
+  if (!provider) throw new Error('NO_WALLET');
+  const bytes = new TextEncoder().encode(message);
+  const hexMessage = (`0x` +
+    Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')) as `0x${string}`;
+  return provider.request<`0x${string}`>({
+    method: 'personal_sign',
+    params: [hexMessage, address],
+  });
+}
+
+export interface UnsignedTx {
+  to: string;
+  data: `0x${string}`;
+  value?: string;
+}
+
+/** Sends a prebuilt unsigned transaction via the connected wallet and returns the tx hash. */
+export async function sendTransaction(from: string, tx: UnsignedTx): Promise<`0x${string}`> {
+  const provider = getInjectedProvider();
+  if (!provider) throw new Error('NO_WALLET');
+  return provider.request<`0x${string}`>({
+    method: 'eth_sendTransaction',
+    params: [{ from, to: tx.to, data: tx.data, value: tx.value ?? '0x0' }],
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -14,6 +14,7 @@ export interface TokenApproval {
   token: string;
   spender: string;
   amount: string;
+  label?: string;
 }
 
 export interface ContractInspectionResult {
@@ -30,3 +31,15 @@ export type ContractFlag =
   | "empty-bytecode"
   | "simulation-reverted"
   | "unlimited-approval-requested";
+
+export interface ThreatAlert {
+  id: string;
+  category: "Phishing" | "Fake Contract" | "Rug Pull" | "Wallet Drainer" | "Unlimited Approval" | "Blacklist";
+  title: string;
+  targetAddress: string;
+  severity: "SAFE" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  timestamp: string;
+  description: string;
+  reporter: string;
+  upvotes: number;
+}

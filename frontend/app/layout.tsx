@@ -4,6 +4,7 @@ import './globals.css';
 import { DottedSurface } from '../components/ui/dotted-surface';
 import { CustomCursor } from '../components/ui/CustomCursor';
 import { ToastContainer } from '../components/ui/Toast';
+import { ConnectWalletModal } from '../components/wallet/ConnectWalletModal';
 
 // Body font — Inter
 const inter = Inter({
@@ -63,6 +64,7 @@ export default function RootLayout({
         </footer>
 
         <ToastContainer />
+        <ConnectWalletModal />
       </body>
     </html>
   );
