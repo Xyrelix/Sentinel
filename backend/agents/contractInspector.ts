@@ -15,6 +15,7 @@ import {
 } from "../lib/xlayer/rpcClient";
 import type { ContractFlag, ContractInspectionResult } from "@shared/types";
 import { isUnlimitedAmount } from "../lib/utils";
+import { checkAddressSecurity, checkTokenSecurity } from "../lib/goplus";
 
 // Minimum bytecode size (in bytes) below which we treat a "contract" as
 // suspicious — most real ERC20/ERC721 contracts are well over this.
@@ -78,6 +79,33 @@ export async function inspectContract(
     }
   }
 
+  // 4. Real-world threat intelligence via GoPlus Security — best-effort.
+  // GoPlus downtime or rate-limiting should never break a scan; on failure
+  // we simply proceed without this signal.
+  const externalFindings: string[] = [];
+
+  try {
+    const addressCheck = await checkAddressSecurity(tx.to);
+    if (addressCheck.isMalicious) {
+      flags.push("goplus-malicious-address");
+      externalFindings.push(...addressCheck.reasons);
+    }
+  } catch {
+    // best-effort — ignore
+  }
+
+  if (contractInfo.isContract) {
+    try {
+      const tokenCheck = await checkTokenSecurity(tx.to);
+      if (tokenCheck.isHoneypot) {
+        flags.push("goplus-honeypot-token");
+        externalFindings.push(...tokenCheck.reasons);
+      }
+    } catch {
+      // best-effort — ignore
+    }
+  }
+
   return {
     address: tx.to,
     isContract: contractInfo.isContract,
@@ -85,5 +113,6 @@ export async function inspectContract(
     simulationSucceeded: simulation.success,
     revertReason: simulation.revertReason,
     flags,
+    externalFindings: externalFindings.length ? externalFindings : undefined,
   };
 }

@@ -19,9 +19,14 @@ const FLAG_WEIGHTS: Record<ContractFlag, number> = {
   "empty-bytecode": 35,
   "simulation-reverted": 25,
   "unlimited-approval-requested": 70,
+  "goplus-malicious-address": 85,
+  "goplus-honeypot-token": 80,
 };
 
-// Human-readable explanation shown to the user for each flag.
+// Human-readable explanation shown to the user for each flag. Where a flag
+// has specific external findings (currently only the goplus-* flags), those
+// get appended verbatim in analyzeRisk() below rather than relying solely on
+// this generic line — a single flag can have several distinct findings.
 const FLAG_REASONS: Record<ContractFlag, string> = {
   "not-a-contract":
     "The target address has no contract code — it's a regular wallet, not the token or dApp it claims to be.",
@@ -31,6 +36,10 @@ const FLAG_REASONS: Record<ContractFlag, string> = {
     "Simulating this transaction failed, meaning it would likely fail (or behave unexpectedly) if you signed it.",
   "unlimited-approval-requested":
     "This transaction asks for unlimited spending approval on a token — it could drain your balance at any point in the future, not just now.",
+  "goplus-malicious-address":
+    "This address matches known malicious activity in GoPlus Security's real-world threat intelligence database.",
+  "goplus-honeypot-token":
+    "GoPlus Security's live token analysis flagged this contract with honeypot or scam-tax characteristics.",
 };
 
 function scoreToLabel(score: number): RiskScore["label"] {
@@ -57,6 +66,13 @@ export function analyzeRisk(
   // Extra context in the reasons list if simulation gave us a revert reason.
   if (inspection.revertReason) {
     reasons.push(`Simulation error: ${inspection.revertReason}`);
+  }
+
+  // Specific external threat-intel findings (e.g. GoPlus) — richer than the
+  // generic per-flag reason above, since a flag can have several distinct
+  // underlying findings.
+  if (inspection.externalFindings?.length) {
+    reasons.push(...inspection.externalFindings);
   }
 
   score = Math.min(score, 100);
