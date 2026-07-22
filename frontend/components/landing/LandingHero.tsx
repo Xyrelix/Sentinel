@@ -75,17 +75,27 @@ export const LandingHero: React.FC = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto pt-2"
         >
           {isConnected ? (
-            <button
-              onClick={() => setActiveTab('scanner')}
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
-            >
-              <Scan className="w-4 h-4" />
-              <span>Launch AI Scanner</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            <>
+              <button
+                onClick={() => setActiveTab('scanner')}
+                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
+              >
+                <Scan className="w-4 h-4" />
+                <span>Launch AI Scanner</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#111111] border border-[#1E1E1E] hover:border-white/20 text-white font-semibold text-sm hover:bg-[#161616] transition-all cursor-pointer"
+              >
+                <Activity className="w-4 h-4 text-accent" />
+                <span>View Dashboard</span>
+              </button>
+            </>
           ) : (
             <button
-              onClick={connectWallet}
+              onClick={() => connectWallet()}
               disabled={isConnecting}
               className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all cursor-pointer"
             >

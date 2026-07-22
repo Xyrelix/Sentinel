@@ -3,13 +3,15 @@
  *
  * Supabase client + typed queries.
  *
- * Two tables in use:
+ * Three tables in use:
  *   - watched_pairs — token/spender pairs to check wallet approvals
  *     against, used by api/walletHealth.ts (replaces the old hardcoded
  *     WATCHED_PAIRS array).
  *   - auth_nonces — single-use, expiring nonces for wallet-signature
  *     authentication, used by lib/okx/walletSdk.ts to prevent signature
  *     replay attacks.
+ *   - threat_reports — community-submitted scam reports, used by
+ *     api/threatIntel.ts.
  *
  * Requires SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.
  */
@@ -20,18 +22,19 @@ import type { Address } from "viem";
 
 let client: SupabaseClient | null = null;
 
+// Accepts either name — SUPABASE_ANON_KEY (Supabase's own convention) or
+// SUPABASE_API_KEY (this project's .env uses the latter).
+const supabaseKey = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_API_KEY;
+
 /** Returns a singleton Supabase client. */
 export function getSupabaseClient(): SupabaseClient {
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
+  if (!process.env.SUPABASE_URL || !supabaseKey) {
     throw new Error(
-      "SUPABASE_URL and SUPABASE_ANON_KEY must be set in backend/.env.local"
+      "SUPABASE_URL and SUPABASE_ANON_KEY (or SUPABASE_API_KEY) must be set in backend/.env.local"
     );
   }
   if (!client) {
-    client = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_ANON_KEY
-    );
+    client = createClient(process.env.SUPABASE_URL, supabaseKey);
   }
   return client;
 }
@@ -165,4 +168,107 @@ export async function consumeNonce(
     .eq("nonce", nonce);
 
   return !updateError;
+}
+
+// ---------------------------------------------------------------------------
+// threat_reports table
+// ---------------------------------------------------------------------------
+//
+// Schema (create in Supabase SQL editor):
+//
+// create table threat_reports (
+//   id uuid primary key default gen_random_uuid(),
+//   category text not null,
+//   title text not null,
+//   target_address text not null,
+//   severity text not null,
+//   description text not null,
+//   reporter text not null,
+//   upvotes int not null default 0,
+//   created_at timestamptz default now()
+// );
+
+export interface ThreatReportRow {
+  id: string;
+  category: string;
+  title: string;
+  targetAddress: string;
+  severity: string;
+  description: string;
+  reporter: string;
+  upvotes: number;
+  createdAt: string;
+}
+
+export interface NewThreatReport {
+  category: string;
+  title: string;
+  targetAddress: string;
+  severity: string;
+  description: string;
+  reporter: string;
+}
+
+/**
+ * Fetches community-submitted threat reports, most recent first. Used by
+ * api/threatIntel.ts to back the "Community Intelligence" feed.
+ */
+export async function getThreatReports(): Promise<ThreatReportRow[]> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("threat_reports")
+    .select("id, category, title, target_address, severity, description, reporter, upvotes, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch threat reports: ${error.message}`);
+  }
+
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    category: row.category,
+    title: row.title,
+    targetAddress: row.target_address,
+    severity: row.severity,
+    description: row.description,
+    reporter: row.reporter,
+    upvotes: row.upvotes,
+    createdAt: row.created_at,
+  }));
+}
+
+/**
+ * Inserts a new community threat report and returns the stored row.
+ * Used by api/threatIntel.ts's submitThreatReport().
+ */
+export async function insertThreatReport(report: NewThreatReport): Promise<ThreatReportRow> {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase
+    .from("threat_reports")
+    .insert({
+      category: report.category,
+      title: report.title,
+      target_address: report.targetAddress,
+      severity: report.severity,
+      description: report.description,
+      reporter: report.reporter,
+    })
+    .select("id, category, title, target_address, severity, description, reporter, upvotes, created_at")
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to submit threat report: ${error?.message ?? "unknown error"}`);
+  }
+
+  return {
+    id: data.id,
+    category: data.category,
+    title: data.title,
+    targetAddress: data.target_address,
+    severity: data.severity,
+    description: data.description,
+    reporter: data.reporter,
+    upvotes: data.upvotes,
+    createdAt: data.created_at,
+  };
 }

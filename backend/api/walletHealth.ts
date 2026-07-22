@@ -27,17 +27,24 @@ export async function getWalletHealth(address: string): Promise<WalletHealth> {
   const riskFlags: string[] = [];
 
   for (const pair of watchedPairs) {
-    const allowance = await getTokenAllowance(
-      pair.token,
-      address as Address,
-      pair.spender
-    );
+    let allowance: bigint;
+    try {
+      allowance = await getTokenAllowance(pair.token, address as Address, pair.spender);
+    } catch {
+      // A single bad/stale watchlist row (e.g. a non-contract or since-removed
+      // token address) shouldn't take down the whole wallet-health check.
+      riskFlags.push(
+        `Could not check allowance for watched pair "${pair.label}" — the token address may be invalid.`
+      );
+      continue;
+    }
 
     if (allowance > 0n) {
       approvals.push({
         token: pair.token,
         spender: pair.spender,
         amount: allowance.toString(),
+        label: pair.label,
       });
 
       if (isUnlimitedAmount(allowance)) {

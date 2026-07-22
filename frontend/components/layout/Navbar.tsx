@@ -17,14 +17,17 @@ export function Navbar() {
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
   const wallet = useSentinelStore((state) => state.wallet);
   const isConnecting = useSentinelStore((state) => state.isConnecting);
-  const connectWallet = useSentinelStore((state) => state.connectWallet);
   const disconnectWallet = useSentinelStore((state) => state.disconnectWallet);
+  const setConnectModalOpen = useSentinelStore((state) => state.setConnectModalOpen);
 
   const links: { id: NavTab; label: string }[] = wallet.isConnected
     ? [
         { id: 'landing', label: 'Overview' },
+        { id: 'dashboard', label: 'Dashboard' },
         { id: 'scanner', label: 'AI Scanner' },
         { id: 'wallet', label: 'Wallet Health' },
+        { id: 'approvals', label: 'Approvals' },
+        { id: 'community', label: 'Threat Intel' },
       ]
     : [];
 
@@ -38,7 +41,7 @@ export function Navbar() {
     if (wallet.isConnected) {
       disconnectWallet();
     } else {
-      connectWallet();
+      setConnectModalOpen(true);
     }
   };
 

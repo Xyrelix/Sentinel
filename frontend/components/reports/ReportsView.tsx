@@ -6,18 +6,39 @@ import { FileText, Download, ShieldCheck, CheckCircle2, Award, Zap, ExternalLink
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
 import { Badge } from '../ui/Badge';
+import { downloadAuditPdf } from '../../lib/pdf';
 
 export const ReportsView: React.FC = () => {
   const wallet = useSentinelStore((state) => state.wallet);
   const activeScanResult = useSentinelStore((state) => state.activeScanResult);
   const addToast = useSentinelStore((state) => state.addToast);
+  const setActiveTab = useSentinelStore((state) => state.setActiveTab);
 
   const handleExportPdf = () => {
-    addToast({
-      type: 'success',
-      title: 'PDF Security Certificate Exported',
-      description: 'Sentinel AI Audit Report downloaded successfully.',
-    });
+    if (!activeScanResult) {
+      addToast({
+        type: 'warning',
+        title: 'No Scan to Export',
+        description: 'Run a scan first — the certificate is generated from a real scan result.',
+      });
+      setActiveTab('scanner');
+      return;
+    }
+
+    try {
+      downloadAuditPdf(activeScanResult, wallet);
+      addToast({
+        type: 'success',
+        title: 'PDF Security Certificate Exported',
+        description: 'Sentinel AI Audit Report downloaded successfully.',
+      });
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'Export Failed',
+        description: 'Could not generate the PDF. Try again.',
+      });
+    }
   };
 
   return (
@@ -66,30 +87,45 @@ export const ReportsView: React.FC = () => {
             </div>
 
             <div className="text-left sm:text-right font-mono text-xs text-accent">
-              <p>Certificate ID: <span className="text-white font-bold">SEN-OKX-9481</span></p>
-              <p>Issued Date: <span className="text-white font-bold">July 21, 2026</span></p>
+              <p>
+                Certificate ID:{' '}
+                <span className="text-white font-bold">
+                  {activeScanResult ? `SEN-OKX-${activeScanResult.targetAddress.slice(2, 8).toUpperCase()}` : '—'}
+                </span>
+              </p>
+              <p>
+                Issued Date:{' '}
+                <span className="text-white font-bold">
+                  {activeScanResult ? new Date().toISOString().slice(0, 10) : '—'}
+                </span>
+              </p>
             </div>
           </div>
 
+          {!activeScanResult ? (
+            <div className="py-10 text-center text-accent text-sm">
+              <ShieldCheck className="w-10 h-10 text-accent mx-auto mb-2 opacity-50" />
+              No scan yet. Run the AI Scanner to generate a real, exportable audit certificate.
+            </div>
+          ) : (
+          <>
           {/* Audit Metrics Overview Grid */}
           <div className="grid sm:grid-cols-3 gap-4">
             <div className="p-4 rounded-xl bg-[#161616] border border-[#1E1E1E]">
               <span className="text-xs text-accent uppercase font-medium block">Audited Target</span>
-              <p className="text-sm font-bold text-white mt-1 font-mono">
-                {activeScanResult ? activeScanResult.targetName : 'Uniswap V3 Router'}
-              </p>
+              <p className="text-sm font-bold text-white mt-1 font-mono">{activeScanResult.targetName}</p>
             </div>
 
             <div className="p-4 rounded-xl bg-[#161616] border border-[#1E1E1E]">
               <span className="text-xs text-accent uppercase font-medium block">Threat Level</span>
               <div className="mt-1">
-                <Badge level={activeScanResult ? activeScanResult.riskLevel : 'SAFE'} />
+                <Badge level={activeScanResult.riskLevel} />
               </div>
             </div>
 
             <div className="p-4 rounded-xl bg-[#161616] border border-[#1E1E1E]">
-              <span className="text-xs text-accent uppercase font-medium block">AI Engine</span>
-              <p className="text-sm font-bold text-white mt-1">OpenAI GPT-4o + CrewAI</p>
+              <span className="text-xs text-accent uppercase font-medium block">Analysis Engine</span>
+              <p className="text-sm font-bold text-white mt-1">Sentinel On-Chain Pipeline</p>
             </div>
           </div>
 
@@ -98,35 +134,25 @@ export const ReportsView: React.FC = () => {
             <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
               <Zap className="w-4 h-4 text-primary" /> Executive Threat Summary:
             </h4>
-            <p className="text-xs text-accent leading-relaxed">
-              {activeScanResult
-                ? activeScanResult.aiExplanation.whatWeFound
-                : 'Verified contract bytecode against 140+ known drainer vectors. Zero honeypot backdoors detected.'}
-            </p>
+            <p className="text-xs text-accent leading-relaxed">{activeScanResult.aiExplanation.whatWeFound}</p>
           </div>
 
-          {/* Verification Timeline */}
+          {/* Verification Steps — the real checks run by this specific scan */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Verification Steps Completed:</h4>
+            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Checks Performed:</h4>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
-              <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                <span>Bytecode Hash Matching & Decompilation</span>
-              </div>
-              <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                <span>Permit2 Signature Payload Inspection</span>
-              </div>
-              <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                <span>Liquidity Pool Lock Protocol Verification</span>
-              </div>
-              <div className="flex items-center gap-2 text-white">
-                <CheckCircle2 className="w-4 h-4 text-success" />
-                <span>OKX X Layer Telemetry Database Check</span>
-              </div>
+              {activeScanResult.checks.map((check) => (
+                <div key={check.id} className="flex items-center gap-2 text-white">
+                  <CheckCircle2
+                    className={`w-4 h-4 ${check.status === 'passed' ? 'text-success' : check.status === 'warning' ? 'text-warning' : 'text-primary'}`}
+                  />
+                  <span>{check.label}</span>
+                </div>
+              ))}
             </div>
           </div>
+          </>
+          )}
         </div>
       </GlowCard>
     </div>
