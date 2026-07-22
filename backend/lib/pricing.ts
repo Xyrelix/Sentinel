@@ -2,10 +2,10 @@
  * lib/pricing.ts
  *
  * Server-side native-token USD pricing via CoinGecko. Uses COINGECKO_API_KEY
- * (a free "Demo" tier key) when set — the fully public, unauthenticated
+ * (a free "Demo" tier key) when set - the fully public, unauthenticated
  * CoinGecko endpoint has low rate limits and fails intermittently under load;
  * a Demo key raises those limits substantially. This must run server-side
- * only — the key would be exposed in the client bundle if called from the
+ * only - the key would be exposed in the client bundle if called from the
  * browser, which is why frontend/lib/web3.ts calls /api/price instead of
  * hitting CoinGecko directly.
  */
@@ -28,7 +28,7 @@ export function getCoingeckoId(chainId: number): string {
   return COINGECKO_IDS[chainId] ?? "ethereum";
 }
 
-/** Fetches the live USD price of a chain's native token. Throws on failure — callers should treat this as best-effort. */
+/** Fetches the live USD price of a chain's native token. Throws on failure - callers should treat this as best-effort. */
 export async function getNativeTokenPriceUsd(chainId: number): Promise<number> {
   const id = getCoingeckoId(chainId);
   const headers: Record<string, string> = {};

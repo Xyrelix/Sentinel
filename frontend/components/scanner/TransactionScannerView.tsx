@@ -85,7 +85,7 @@ export const TransactionScannerView: React.FC = () => {
             <p className="text-xs text-primary font-semibold pt-1">{scanError}</p>
           )}
 
-          {/* Preset Buttons — instant scripted demo scenarios */}
+          {/* Preset Buttons - instant scripted demo scenarios */}
           <div className="flex flex-wrap items-center gap-2 pt-2">
             <span className="text-xs text-accent font-medium mr-2">Preset Test Cases:</span>
             <button

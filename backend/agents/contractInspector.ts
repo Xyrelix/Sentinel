@@ -3,7 +3,7 @@
  *
  * First-pass inspection of a transaction's target contract, run before
  * signing. Gathers raw findings (bytecode presence, simulation result,
- * suspicious call patterns) — does NOT assign a risk score itself.
+ * suspicious call patterns) - does NOT assign a risk score itself.
  * riskAnalyzer.ts consumes this output to produce a RiskScore.
  */
 
@@ -19,7 +19,7 @@ import { checkAddressSecurity, checkTokenSecurity } from "../lib/goplus";
 import { checkChainabuseAddress } from "../lib/chainabuse";
 
 // Minimum bytecode size (in bytes) below which we treat a "contract" as
-// suspicious — most real ERC20/ERC721 contracts are well over this.
+// suspicious - most real ERC20/ERC721 contracts are well over this.
 const SUSPICIOUS_BYTECODE_THRESHOLD = 32;
 
 // Minimal ABI fragment for detecting ERC20 approve() calls in tx.data.
@@ -38,7 +38,7 @@ const ERC20_APPROVE_ABI = [
 
 /**
  * Inspects the target of an unsigned transaction and returns raw findings.
- * Never broadcasts anything — only reads on-chain state and simulates.
+ * Never broadcasts anything - only reads on-chain state and simulates.
  */
 export async function inspectContract(
   tx: TransactionRequestInput
@@ -57,13 +57,13 @@ export async function inspectContract(
     flags.push("empty-bytecode");
   }
 
-  // 2. Simulation check — does the call revert before it's ever signed?
+  // 2. Simulation check - does the call revert before it's ever signed?
   const simulation = await simulateTransaction(tx);
   if (!simulation.success) {
     flags.push("simulation-reverted");
   }
 
-  // 3. Unlimited-approval detection — decode tx.data if it matches
+  // 3. Unlimited-approval detection - decode tx.data if it matches
   // ERC20 approve(spender, amount) and check for max uint256.
   if (tx.data && tx.data !== "0x") {
     try {
@@ -76,11 +76,11 @@ export async function inspectContract(
         flags.push("unlimited-approval-requested");
       }
     } catch {
-      // tx.data doesn't match approve() — not an error, just not this case.
+      // tx.data doesn't match approve() - not an error, just not this case.
     }
   }
 
-  // 4. Real-world threat intelligence via GoPlus Security — best-effort.
+  // 4. Real-world threat intelligence via GoPlus Security - best-effort.
   // GoPlus downtime or rate-limiting should never break a scan; on failure
   // we simply proceed without this signal.
   const externalFindings: string[] = [];
@@ -92,7 +92,7 @@ export async function inspectContract(
       externalFindings.push(...addressCheck.reasons);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   if (contractInfo.isContract) {
@@ -103,11 +103,11 @@ export async function inspectContract(
         externalFindings.push(...tokenCheck.reasons);
       }
     } catch {
-      // best-effort — ignore
+      // best-effort - ignore
     }
   }
 
-  // 5. Chainabuse community-reported scam database — a second, independent
+  // 5. Chainabuse community-reported scam database - a second, independent
   // address-reputation source alongside GoPlus. No-ops (never throws) when
   // CHAINABUSE_API_KEY isn't configured, so this is purely additive.
   try {
@@ -117,7 +117,7 @@ export async function inspectContract(
       externalFindings.push(...chainabuseCheck.reasons);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   return {

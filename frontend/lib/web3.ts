@@ -10,7 +10,7 @@ export type ContractFlag =
   | 'goplus-honeypot-token';
 
 // ---------------------------------------------------------------------------
-// Chain metadata (multichain — not restricted to X Layer)
+// Chain metadata (multichain - not restricted to X Layer)
 // ---------------------------------------------------------------------------
 
 interface ChainMeta {
@@ -41,11 +41,11 @@ export function getChainMeta(chainId: number): ChainMeta {
 // ---------------------------------------------------------------------------
 //
 // Goes through our own /api/price route rather than calling CoinGecko
-// directly — the CoinGecko API key (raises rate limits above the public
+// directly - the CoinGecko API key (raises rate limits above the public
 // anonymous tier) lives server-side only and must never reach the browser
 // bundle.
 
-/** Fetches the live USD price of a chain's native token via /api/price. Throws on failure — callers should treat this as best-effort. */
+/** Fetches the live USD price of a chain's native token via /api/price. Throws on failure - callers should treat this as best-effort. */
 export async function getNativeTokenPriceUsd(chainId: number): Promise<number> {
   const res = await fetch(`/api/price?chainId=${chainId}`);
   if (!res.ok) throw new Error('PRICE_FETCH_FAILED');
@@ -210,7 +210,7 @@ export async function refreshBalance(address: string): Promise<bigint> {
   return BigInt(balanceHex);
 }
 
-/** Signs a plain-text message with `personal_sign` — used for the nonce-based auth handshake. */
+/** Signs a plain-text message with `personal_sign` - used for the nonce-based auth handshake. */
 export async function signMessage(address: string, message: string): Promise<`0x${string}`> {
   const provider = getInjectedProvider();
   if (!provider) throw new Error('NO_WALLET');
@@ -249,7 +249,7 @@ export function isValidAddress(value: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(value.trim());
 }
 
-/** Loose check for "this looks like a domain, not an address" — strips a protocol/path if present. */
+/** Loose check for "this looks like a domain, not an address" - strips a protocol/path if present. */
 export function isValidDomain(value: string): boolean {
   const trimmed = value.trim().toLowerCase();
   if (isValidAddress(trimmed)) return false;
@@ -273,13 +273,13 @@ export function shortenAddress(address: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// GoPlus Security — client-side fallback checks
+// GoPlus Security - client-side fallback checks
 // ---------------------------------------------------------------------------
 //
 // Same real-world threat intel as backend/lib/goplus.ts, called directly
 // from the browser for the client-only fallback path (used when /api/scan
 // is unreachable). GoPlus's public endpoints work with no key at all
-// (verified live) — only GOPLUS_API_KEY (higher rate limits) stays
+// (verified live) - only GOPLUS_API_KEY (higher rate limits) stays
 // server-side; the underlying checks work here regardless.
 
 const GOPLUS_BASE = 'https://api.gopluslabs.io/api/v1';
@@ -322,7 +322,7 @@ async function checkGoPlusToken(address: string): Promise<string[]> {
   return reasons;
 }
 
-/** Checks a domain/URL against GoPlus's phishing-site database — no wallet or RPC needed. */
+/** Checks a domain/URL against GoPlus's phishing-site database - no wallet or RPC needed. */
 export async function checkPhishingSiteClient(domain: string): Promise<{ isPhishing: boolean; reasons: string[] }> {
   const res = await fetch(`${GOPLUS_BASE}/phishing_site?url=${encodeURIComponent(domain)}`);
   if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
@@ -334,10 +334,10 @@ export async function checkPhishingSiteClient(domain: string): Promise<{ isPhish
   };
 }
 
-// MetaMask's eth-phishing-detect — a second, independent phishing-domain
+// MetaMask's eth-phishing-detect - a second, independent phishing-domain
 // source. Fetches the live, continuously-updated list from GitHub (the
 // bundled npm config.json is a static install-time snapshot that goes
-// stale) — falls back to that bundled snapshot only if the live fetch fails.
+// stale) - falls back to that bundled snapshot only if the live fetch fails.
 const ETH_PHISHING_LIVE_CONFIG_URL =
   'https://raw.githubusercontent.com/MetaMask/eth-phishing-detect/main/src/config.json';
 let ethPhishingDetectorPromise: Promise<PhishingDetector> | null = null;
@@ -351,7 +351,7 @@ async function getEthPhishingDetector(): Promise<PhishingDetector> {
         const config = await res.json();
         return new PhishingDetector(config);
       } catch {
-        // Dynamic import — code-split so this ~370KB fallback snapshot is
+        // Dynamic import - code-split so this ~370KB fallback snapshot is
         // only ever downloaded on the rare path where the live fetch fails,
         // not bundled into every page load.
         const fallbackModule = await import('eth-phishing-detect/src/config.json');
@@ -362,7 +362,7 @@ async function getEthPhishingDetector(): Promise<PhishingDetector> {
   return ethPhishingDetectorPromise;
 }
 
-/** Checks a domain against MetaMask's eth-phishing-detect blocklist — no wallet or RPC needed. */
+/** Checks a domain against MetaMask's eth-phishing-detect blocklist - no wallet or RPC needed. */
 export async function checkEthPhishingListClient(
   domain: string
 ): Promise<{ isPhishing: boolean; reason?: string }> {
@@ -389,9 +389,9 @@ const FLAG_WEIGHTS: Record<ContractFlag, number> = {
 
 const FLAG_REASONS: Record<ContractFlag, string> = {
   'not-a-contract':
-    "The target address has no contract code — it's a regular wallet, not the token or dApp it may claim to be.",
+    "The target address has no contract code - it's a regular wallet, not the token or dApp it may claim to be.",
   'empty-bytecode':
-    "The contract's code is unusually small for what it claims to do — a common sign of a hastily deployed scam contract.",
+    "The contract's code is unusually small for what it claims to do - a common sign of a hastily deployed scam contract.",
   'goplus-malicious-address':
     'This address matches known malicious activity in GoPlus Security real-world threat intelligence.',
   'goplus-honeypot-token':
@@ -414,8 +414,8 @@ function scoreToLabel(score: number): ScanFinding['label'] {
 }
 
 // Reads live on-chain state via the connected provider and derives an honest
-// risk finding, enriched with GoPlus real-world threat intel (best-effort —
-// GoPlus downtime never breaks a scan). No indexer — only what an RPC node
+// risk finding, enriched with GoPlus real-world threat intel (best-effort -
+// GoPlus downtime never breaks a scan). No indexer - only what an RPC node
 // and GoPlus's public API know.
 export async function scanAddress(address: string): Promise<ScanFinding> {
   const provider = getInjectedProvider();
@@ -445,7 +445,7 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
       externalReasons.push(...addressFindings);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   if (isContract) {
@@ -456,7 +456,7 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
         externalReasons.push(...tokenFindings);
       }
     } catch {
-      // best-effort — ignore
+      // best-effort - ignore
     }
   }
 
@@ -483,9 +483,9 @@ export interface DomainScanFinding {
 }
 
 /**
- * Checks a domain against two independent phishing-domain sources — GoPlus
- * and MetaMask's eth-phishing-detect. No wallet or RPC needed — works even
- * when disconnected. Each source is best-effort — one being down doesn't
+ * Checks a domain against two independent phishing-domain sources - GoPlus
+ * and MetaMask's eth-phishing-detect. No wallet or RPC needed - works even
+ * when disconnected. Each source is best-effort - one being down doesn't
  * block the other from still catching a match.
  */
 export async function scanDomain(domain: string): Promise<DomainScanFinding> {
@@ -499,7 +499,7 @@ export async function scanDomain(domain: string): Promise<DomainScanFinding> {
       reasons.push(...goPlusResult.reasons);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   try {
@@ -509,7 +509,7 @@ export async function scanDomain(domain: string): Promise<DomainScanFinding> {
       if (metaMaskResult.reason) reasons.push(metaMaskResult.reason);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   if (isPhishing) {

@@ -27,16 +27,16 @@ const FLAG_WEIGHTS: Record<ContractFlag, number> = {
 // Human-readable explanation shown to the user for each flag. Where a flag
 // has specific external findings (currently only the goplus-* flags), those
 // get appended verbatim in analyzeRisk() below rather than relying solely on
-// this generic line — a single flag can have several distinct findings.
+// this generic line - a single flag can have several distinct findings.
 const FLAG_REASONS: Record<ContractFlag, string> = {
   "not-a-contract":
-    "The target address has no contract code — it's a regular wallet, not the token or dApp it claims to be.",
+    "The target address has no contract code - it's a regular wallet, not the token or dApp it claims to be.",
   "empty-bytecode":
-    "The contract's code is unusually small for what it claims to do — a common sign of a hastily deployed scam contract.",
+    "The contract's code is unusually small for what it claims to do - a common sign of a hastily deployed scam contract.",
   "simulation-reverted":
     "Simulating this transaction failed, meaning it would likely fail (or behave unexpectedly) if you signed it.",
   "unlimited-approval-requested":
-    "This transaction asks for unlimited spending approval on a token — it could drain your balance at any point in the future, not just now.",
+    "This transaction asks for unlimited spending approval on a token - it could drain your balance at any point in the future, not just now.",
   "goplus-malicious-address":
     "This address matches known malicious activity in GoPlus Security's real-world threat intelligence database.",
   "goplus-honeypot-token":
@@ -53,7 +53,7 @@ function scoreToLabel(score: number): RiskScore["label"] {
 
 /**
  * Converts a ContractInspectionResult into a RiskScore.
- * Pure function — no I/O, easy to unit test in isolation.
+ * Pure function - no I/O, easy to unit test in isolation.
  */
 export function analyzeRisk(
   inspection: ContractInspectionResult
@@ -71,7 +71,7 @@ export function analyzeRisk(
     reasons.push(`Simulation error: ${inspection.revertReason}`);
   }
 
-  // Specific external threat-intel findings (e.g. GoPlus) — richer than the
+  // Specific external threat-intel findings (e.g. GoPlus) - richer than the
   // generic per-flag reason above, since a flag can have several distinct
   // underlying findings.
   if (inspection.externalFindings?.length) {
@@ -80,7 +80,7 @@ export function analyzeRisk(
 
   score = Math.min(score, 100);
 
-  // Clean contract, no flags at all — give an explicit "all clear" reason.
+  // Clean contract, no flags at all - give an explicit "all clear" reason.
   if (reasons.length === 0) {
     reasons.push("No known risk patterns detected in this transaction.");
   }

@@ -18,7 +18,7 @@ export const POST = withLogging('auth.verify', async (request: Request) => {
     signature: body.signature,
   });
 
-  // Deliberately never log the signature itself — only the outcome.
+  // Deliberately never log the signature itself - only the outcome.
   logger.info('auth.verify.result', { address: body.address, verified });
 
   return Response.json({ verified });

@@ -20,7 +20,7 @@ export const ReportsView: React.FC = () => {
       addToast({
         type: 'warning',
         title: 'No Scan to Export',
-        description: 'Run a scan first — the certificate is generated from a real scan result.',
+        description: 'Run a scan first - the certificate is generated from a real scan result.',
       });
       setActiveTab('scanner');
       return;
@@ -91,13 +91,13 @@ export const ReportsView: React.FC = () => {
               <p>
                 Certificate ID:{' '}
                 <span className="text-white font-bold">
-                  {activeScanResult ? `SEN-OKX-${activeScanResult.targetAddress.slice(2, 8).toUpperCase()}` : '—'}
+                  {activeScanResult ? `SEN-OKX-${activeScanResult.targetAddress.slice(2, 8).toUpperCase()}` : '-'}
                 </span>
               </p>
               <p>
                 Issued Date:{' '}
                 <span className="text-white font-bold">
-                  {activeScanResult ? new Date().toISOString().slice(0, 10) : '—'}
+                  {activeScanResult ? new Date().toISOString().slice(0, 10) : '-'}
                 </span>
               </p>
             </div>
@@ -138,7 +138,7 @@ export const ReportsView: React.FC = () => {
             <p className="text-xs text-accent leading-relaxed">{activeScanResult.aiExplanation.whatWeFound}</p>
           </div>
 
-          {/* Verification Steps — the real checks run by this specific scan */}
+          {/* Verification Steps - the real checks run by this specific scan */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Checks Performed:</h4>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">

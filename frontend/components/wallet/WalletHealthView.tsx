@@ -67,7 +67,7 @@ export const WalletHealthView: React.FC = () => {
         </button>
       </div>
 
-      {/* Top 4 Wallet Health Cards — all real, derived from live on-chain + price data */}
+      {/* Top 4 Wallet Health Cards - all real, derived from live on-chain + price data */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <GlowCard>
           <div className="flex items-start justify-between">
@@ -172,11 +172,11 @@ export const WalletHealthView: React.FC = () => {
         </div>
       </GlowCard>
 
-      {/* Charts Grid Section — illustrative only: historical risk trends and a
+      {/* Charts Grid Section - illustrative only: historical risk trends and a
           full multi-token portfolio breakdown both require an on-chain indexer,
           which isn't connected in this build. The 4 cards above are real. */}
       <p className="text-xs text-accent/70 italic">
-        Note: the charts below are illustrative examples — historical trend tracking and multi-token
+        Note: the charts below are illustrative examples - historical trend tracking and multi-token
         portfolio breakdowns require an on-chain indexer, not yet connected in this build.
       </p>
       <div className="grid lg:grid-cols-12 gap-8">

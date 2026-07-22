@@ -3,7 +3,7 @@
  * lib/phishingList.ts
  *
  * MetaMask's community-maintained phishing-domain blocklist
- * (eth-phishing-detect) — a second, independent phishing-domain source
+ * (eth-phishing-detect) - a second, independent phishing-domain source
  * alongside GoPlus's phishing_site check, so a domain flagged by either
  * provider gets caught. The npm package bundles a config.json snapshot
  * frozen at install time (goes stale); this fetches the live,
@@ -27,7 +27,7 @@ async function getDetector(): Promise<PhishingDetector> {
         const config = await res.json();
         return new PhishingDetector(config);
       } catch {
-        // Live fetch failed (network issue, GitHub rate limit, etc.) — fall
+        // Live fetch failed (network issue, GitHub rate limit, etc.) - fall
         // back to the bundled snapshot rather than skipping the check entirely.
         return new PhishingDetector(fallbackConfig);
       }

@@ -2,7 +2,7 @@
  * api/walletHealth.ts
  *
  * Checks a wallet's token approvals against the Supabase-backed watchlist
- * and flags anything risky — the backend for the "Wallet Health Monitor"
+ * and flags anything risky - the backend for the "Wallet Health Monitor"
  * and "One-Click Approval Revoke" features.
  */
 
@@ -14,7 +14,7 @@ import type { WalletHealth, TokenApproval } from "@shared/types";
 
 /**
  * Checks a wallet's approvals across the Supabase-backed watchlist and
- * returns a WalletHealth summary. Only reads on-chain state — never signs
+ * returns a WalletHealth summary. Only reads on-chain state - never signs
  * or sends anything.
  */
 export async function getWalletHealth(address: string): Promise<WalletHealth> {
@@ -34,7 +34,7 @@ export async function getWalletHealth(address: string): Promise<WalletHealth> {
       // A single bad/stale watchlist row (e.g. a non-contract or since-removed
       // token address) shouldn't take down the whole wallet-health check.
       riskFlags.push(
-        `Could not check allowance for watched pair "${pair.label}" — the token address may be invalid.`
+        `Could not check allowance for watched pair "${pair.label}" - the token address may be invalid.`
       );
       continue;
     }
@@ -55,7 +55,7 @@ export async function getWalletHealth(address: string): Promise<WalletHealth> {
     }
   }
 
-  // Low-balance check — not a security risk, but useful wallet-health context.
+  // Low-balance check - not a security risk, but useful wallet-health context.
   const balance = await getNativeBalance(address as Address);
   if (balance === 0n) {
     riskFlags.push("Wallet has zero native OKB balance.");

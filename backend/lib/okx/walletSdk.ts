@@ -2,9 +2,9 @@
  * lib/okx/walletSdk.ts
  *
  * Backend-side wallet verification. Does NOT connect to wallets, prompt
- * signatures, or hold keys — that's 100% frontend, via OKX Wallet's
+ * signatures, or hold keys - that's 100% frontend, via OKX Wallet's
  * browser SDK. This file's job: issue a nonce, build the message to sign,
- * and verify the returned signature — with replay protection via
+ * and verify the returned signature - with replay protection via
  * lib/db/supabase.ts's auth_nonces table.
  */
 
@@ -20,7 +20,7 @@ export interface SignatureVerificationRequest {
 }
 
 /**
- * Step 1 of the auth flow — call this first. Generates a fresh, stored
+ * Step 1 of the auth flow - call this first. Generates a fresh, stored
  * nonce and returns the exact message the frontend should have the user
  * sign via OKX Wallet.
  */
@@ -43,8 +43,8 @@ export async function startWalletAuth(address: string): Promise<{
 }
 
 /**
- * Step 2 of the auth flow — verifies the signature AND consumes the nonce
- * atomically. Returns false (never throws) on any failure — malformed
+ * Step 2 of the auth flow - verifies the signature AND consumes the nonce
+ * atomically. Returns false (never throws) on any failure - malformed
  * input, expired/reused nonce, or a signature that doesn't match. Callers
  * should treat any false as "reject the request."
  */

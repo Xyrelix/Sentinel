@@ -16,7 +16,7 @@ interface TextShimmerProps {
 }
 
 /**
- * A subtle light sweep travelling across text — reads as an active "scan line",
+ * A subtle light sweep travelling across text - reads as an active "scan line",
  * matching Sentinel's real-time protection theme. Ideal for status badges and
  * eyebrow labels. Uses a moving background-clip gradient (GPU-cheap, no layout).
  */

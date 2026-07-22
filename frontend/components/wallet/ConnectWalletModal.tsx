@@ -93,7 +93,7 @@ export const ConnectWalletModal: React.FC = () => {
                     )}
                   </div>
                   <p className="text-xs text-accent">
-                    {w.isInstalled ? w.desc : 'Not installed — click to get it'}
+                    {w.isInstalled ? w.desc : 'Not installed - click to get it'}
                   </p>
                 </div>
               </div>

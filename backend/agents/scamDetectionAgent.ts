@@ -1,7 +1,7 @@
 /**
  * agents/scamDetectionAgent.ts
  *
- * Top-level orchestrator — the only agent file api/scan.ts should import
+ * Top-level orchestrator - the only agent file api/scan.ts should import
  * directly. Wires contractInspector.ts -> riskAnalyzer.ts into a single
  * call, and is the natural place to add caching, logging, or additional
  * inspection passes later without changing api/scan.ts.
@@ -26,11 +26,11 @@ export async function scanTransaction(
 }
 
 /**
- * Checks a domain/URL against two independent phishing-domain sources —
- * GoPlus and MetaMask's eth-phishing-detect — and returns a RiskScore in
+ * Checks a domain/URL against two independent phishing-domain sources -
+ * GoPlus and MetaMask's eth-phishing-detect - and returns a RiskScore in
  * the same shape as scanTransaction(). A domain isn't a blockchain address,
  * so none of contractInspector.ts's bytecode/simulation checks apply; this
- * is a separate, much simpler path. Each source is best-effort — one being
+ * is a separate, much simpler path. Each source is best-effort - one being
  * down doesn't block the other from still catching a match.
  */
 export async function scanDomain(domain: string): Promise<RiskScore> {
@@ -44,7 +44,7 @@ export async function scanDomain(domain: string): Promise<RiskScore> {
       reasons.push(...goPlusResult.reasons);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   try {
@@ -54,7 +54,7 @@ export async function scanDomain(domain: string): Promise<RiskScore> {
       if (metaMaskResult.reason) reasons.push(metaMaskResult.reason);
     }
   } catch {
-    // best-effort — ignore
+    // best-effort - ignore
   }
 
   if (isPhishing) {

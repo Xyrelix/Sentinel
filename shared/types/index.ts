@@ -25,7 +25,7 @@ export interface ContractInspectionResult {
   revertReason?: string;
   flags: ContractFlag[];
   // Specific human-readable findings from external threat-intel sources
-  // (e.g. GoPlus) — richer than the generic per-flag reason text, since a
+  // (e.g. GoPlus) - richer than the generic per-flag reason text, since a
   // single flag can have several distinct underlying findings.
   externalFindings?: string[];
 }

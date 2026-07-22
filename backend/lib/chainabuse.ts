@@ -1,16 +1,16 @@
 /**
  * lib/chainabuse.ts
  *
- * Chainabuse's community-reported scam-address database — a second,
+ * Chainabuse's community-reported scam-address database - a second,
  * independent address-reputation source alongside GoPlus's address_security
  * check, so an address reported to either community gets caught. Requires
  * CHAINABUSE_API_KEY (confirmed live: the endpoint returns 401 "Invalid
- * credentials" with no key at all, unlike GoPlus's free public tier) — if
+ * credentials" with no key at all, unlike GoPlus's free public tier) - if
  * the key isn't set, checkChainabuseAddress() is skipped entirely rather
  * than failing every scan.
  *
  * NOTE: Chainabuse's own docs (docs.chainabuse.com/reference/reports-1)
- * describe Basic auth, but this uses the Bearer scheme as given — worth
+ * describe Basic auth, but this uses the Bearer scheme as given - worth
  * re-verifying against a real key once one is available, in case the docs
  * page is stale/wrong for this specific key type.
  */
@@ -26,8 +26,8 @@ export interface AddressReportResult {
 /**
  * Checks an address against Chainabuse's community-reported scam database.
  * Returns { isReported: false, reportCount: 0, reasons: [] } (not an error)
- * when CHAINABUSE_API_KEY isn't configured — this check is opt-in.
- * Throws on a genuine request failure — callers should catch, same as the
+ * when CHAINABUSE_API_KEY isn't configured - this check is opt-in.
+ * Throws on a genuine request failure - callers should catch, same as the
  * GoPlus checks.
  */
 export async function checkChainabuseAddress(address: string): Promise<AddressReportResult> {
@@ -47,7 +47,7 @@ export async function checkChainabuseAddress(address: string): Promise<AddressRe
   }
 
   const data = await res.json();
-  // Defensive parsing — the exact response shape isn't confirmed against a
+  // Defensive parsing - the exact response shape isn't confirmed against a
   // real key yet, so handle the plausible shapes (bare array, or wrapped in
   // a data/results field) rather than assuming one.
   const reports: unknown[] = Array.isArray(data) ? data : data?.data ?? data?.results ?? [];

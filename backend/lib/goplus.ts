@@ -1,17 +1,17 @@
 /**
  * lib/goplus.ts
  *
- * Real-world threat intelligence via GoPlus Security's public API — flags
+ * Real-world threat intelligence via GoPlus Security's public API - flags
  * addresses already known to the community as malicious (phishing,
  * blackmail, money laundering, etc.) and tokens with honeypot/scam-tax
  * characteristics. The public endpoints work with no key at all (verified
  * live); GOPLUS_API_KEY, if set, is sent as a bearer token for higher rate
- * limits — never required for correctness, only for throughput.
+ * limits - never required for correctness, only for throughput.
  */
 
 const GOPLUS_BASE = "https://api.gopluslabs.io/api/v1";
 
-// GoPlus only tracks X Layer Mainnet (chain id 196) — used for threat-intel
+// GoPlus only tracks X Layer Mainnet (chain id 196) - used for threat-intel
 // lookups regardless of which X Layer network (main/test) the rest of the
 // scan pipeline reads bytecode from, since real-world scam intelligence is
 // inherently about mainnet activity.
@@ -41,7 +41,7 @@ const ADDRESS_FLAG_LABELS: Record<string, string> = {
   honeypot_related_address: "GoPlus: associated with honeypot contracts.",
 };
 
-/** Checks an address against GoPlus's aggregated malicious-address intelligence. Throws on request failure — best-effort, callers should catch. */
+/** Checks an address against GoPlus's aggregated malicious-address intelligence. Throws on request failure - best-effort, callers should catch. */
 export async function checkAddressSecurity(address: string): Promise<AddressSecurityResult> {
   const res = await fetch(
     `${GOPLUS_BASE}/address_security/${address}?chain_id=${GOPLUS_XLAYER_CHAIN_ID}`,
@@ -68,7 +68,7 @@ export interface TokenSecurityResult {
 
 const HIGH_TAX_THRESHOLD = 0.15;
 
-/** Checks a token contract against GoPlus's token-security analysis (honeypot, tax, mint, hidden owner). Throws on request failure — best-effort, callers should catch. */
+/** Checks a token contract against GoPlus's token-security analysis (honeypot, tax, mint, hidden owner). Throws on request failure - best-effort, callers should catch. */
 export async function checkTokenSecurity(address: string): Promise<TokenSecurityResult> {
   const res = await fetch(
     `${GOPLUS_BASE}/token_security/${GOPLUS_XLAYER_CHAIN_ID}?contract_addresses=${address}`,
@@ -102,7 +102,7 @@ export interface PhishingSiteResult {
   reasons: string[];
 }
 
-/** Checks a domain/URL against GoPlus's phishing-site database. Throws on request failure — best-effort, callers should catch. */
+/** Checks a domain/URL against GoPlus's phishing-site database. Throws on request failure - best-effort, callers should catch. */
 export async function checkPhishingSite(url: string): Promise<PhishingSiteResult> {
   const res = await fetch(`${GOPLUS_BASE}/phishing_site?url=${encodeURIComponent(url)}`, {
     headers: authHeaders(),

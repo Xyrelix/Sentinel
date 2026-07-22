@@ -41,7 +41,7 @@ const item: Variants = {
 };
 
 /**
- * Staggered reveal for headings and hero copy — each word (or character) fades,
+ * Staggered reveal for headings and hero copy - each word (or character) fades,
  * slides up, and de-blurs in sequence. Matches Sentinel's "focus into clarity"
  * security motif. Respects prefers-reduced-motion via framer-motion defaults.
  */
@@ -57,7 +57,7 @@ export const AnimatedText: React.FC<AnimatedTextProps> = ({
 }) => {
   const MotionTag = motion[as as 'span'] as typeof motion.span;
 
-  // Rich children (e.g. gradient <span>) — animate as a single unit.
+  // Rich children (e.g. gradient <span>) - animate as a single unit.
   if (children) {
     return (
       <MotionTag

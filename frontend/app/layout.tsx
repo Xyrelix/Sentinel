@@ -6,21 +6,21 @@ import { CustomCursor } from '../components/ui/CustomCursor';
 import { ToastContainer } from '../components/ui/Toast';
 import { ConnectWalletModal } from '../components/wallet/ConnectWalletModal';
 
-// Body font — Inter
+// Body font - Inter
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
 });
 
-// Heading font — Space Grotesk
+// Heading font - Space Grotesk
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
   variable: '--font-space-grotesk',
   display: 'swap',
 });
 
-// Monospace font — JetBrains Mono
+// Monospace font - JetBrains Mono
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
@@ -55,7 +55,7 @@ export default function RootLayout({
             <div className="flex items-center gap-2.5">
               <img src="/logo.png" alt="Sentinel Logo" className="w-4 h-4 object-contain" />
               <span className="font-bold text-white tracking-wider">SENTINEL AI</span>
-              <span>— Next-Gen Web3 AI Security Shield</span>
+              <span>- Next-Gen Web3 AI Security Shield</span>
             </div>
 
             <div className="flex items-center gap-6">

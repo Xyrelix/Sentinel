@@ -90,7 +90,7 @@ export interface SimulationResult {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetches a submitted/mined transaction by hash — used when reviewing
+ * Fetches a submitted/mined transaction by hash - used when reviewing
  * transaction history for wallet health checks, not for pre-signature scans
  * (those come in as unsigned TransactionRequestInput, see below).
  */
@@ -101,7 +101,7 @@ export async function getTransactionByHash(hash: Hash) {
 
 /**
  * Determines whether an address is a contract (has bytecode) or an EOA.
- * First signal used by contractInspector.ts — interacting with an EOA
+ * First signal used by contractInspector.ts - interacting with an EOA
  * masquerading as a token, for example, is itself a red flag.
  */
 export async function getContractInfo(address: Address): Promise<ContractInfo> {
@@ -117,7 +117,7 @@ export async function getContractInfo(address: Address): Promise<ContractInfo> {
 /**
  * Simulates a transaction via eth_call before it's signed, to check whether
  * it would revert and to get a gas estimate. This is the core of the
- * "pre-signature" scan — we never broadcast, only simulate.
+ * "pre-signature" scan - we never broadcast, only simulate.
  */
 export async function simulateTransaction(
   tx: TransactionRequestInput
@@ -146,7 +146,7 @@ export async function getNativeBalance(address: Address): Promise<bigint> {
 }
 
 /**
- * Reads the ERC20 `allowance(owner, spender)` for a token — the core
+ * Reads the ERC20 `allowance(owner, spender)` for a token - the core
  * primitive behind wallet-health approval checks and the one-click revoke
  * feature. Uses the minimal ERC20 ABI fragment needed.
  */

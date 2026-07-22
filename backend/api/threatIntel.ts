@@ -1,7 +1,7 @@
 /**
  * api/threatIntel.ts
  *
- * Community-sourced scam/threat reports — backend for the "Community
+ * Community-sourced scam/threat reports - backend for the "Community
  * Intelligence" feature. Pure Supabase-backed storage, no AI involved:
  * category/severity come from the reporter, not model inference.
  */

@@ -2,7 +2,7 @@
  * lib/logger.ts
  *
  * Structured JSON logging for Vercel's Runtime Logs. Vercel captures
- * stdout/stderr from serverless functions automatically — emitting one JSON
+ * stdout/stderr from serverless functions automatically - emitting one JSON
  * object per line (rather than freeform text) makes those logs filterable
  * by field (event, route, address, durationMs, etc.) in the dashboard's log
  * explorer, and just as useful for local `next dev` debugging.

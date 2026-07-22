@@ -13,6 +13,10 @@ import {
   isValidAddress,
   isValidDomain,
   getNativeTokenPriceUsd,
+  getChainMeta,
+  refreshBalance,
+  bindWalletEvents,
+  clearActiveProvider,
   ScanFinding,
   DomainScanFinding,
   X_LAYER_CHAIN_ID,
@@ -30,7 +34,7 @@ const EMPTY_WALLET: WalletState = {
 
 const MAX_UINT256_STR = (2n ** 256n - 1n).toString();
 
-// Preset Scans for Instant Simulation — quick demo scenarios (Dashboard shortcuts,
+// Preset Scans for Instant Simulation - quick demo scenarios (Dashboard shortcuts,
 // Scanner preset buttons). Freeform addresses always go through the real on-chain
 // scanAddress() below instead.
 export const PRESET_SCANS: Record<string, ScanResult> = {
@@ -138,7 +142,7 @@ function buildRealScanResult(address: string, finding: ScanFinding): ScanResult 
         status: finding.isContract ? 'passed' : 'failed',
         details: finding.isContract
           ? `Address holds ${finding.bytecodeSize} bytes of contract code.`
-          : 'Address has no contract code — it is a regular wallet (EOA).',
+          : 'Address has no contract code - it is a regular wallet (EOA).',
       },
       {
         id: 'c2',
@@ -191,14 +195,14 @@ function buildDomainScanResult(domain: string, finding: DomainScanFinding): Scan
     aiExplanation: {
       whatWeFound: finding.reasons.join(' '),
       whyItMatters: finding.isPhishing
-        ? 'This site has been reported for phishing — it likely impersonates a legitimate dApp to steal funds or credentials.'
-        : 'No phishing reports found, but absence of a report is not a guarantee of safety — always verify the URL carefully.',
+        ? 'This site has been reported for phishing - it likely impersonates a legitimate dApp to steal funds or credentials.'
+        : 'No phishing reports found, but absence of a report is not a guarantee of safety - always verify the URL carefully.',
       potentialImpact: finding.isPhishing
         ? 'Connecting a wallet or signing anything on this site could result in stolen funds.'
         : 'Standard browsing risk applies. Double-check the domain spelling before connecting a wallet.',
       recommendedAction: finding.isPhishing
         ? 'Do not visit this site or connect your wallet to it.'
-        : 'Proceed with normal caution — verify this is the official domain before connecting a wallet.',
+        : 'Proceed with normal caution - verify this is the official domain before connecting a wallet.',
     },
   };
 }
@@ -210,7 +214,7 @@ function riskLabelToLevel(label: string): ScanResult['riskLevel'] {
 }
 
 // Builds a ScanResult from the real backend pipeline (backend/agents/scamDetectionAgent.ts
-// via /api/scan) — richer than the client-only check: includes simulation and
+// via /api/scan) - richer than the client-only check: includes simulation and
 // unlimited-approval-request detection, not just bytecode presence/size.
 function buildResultFromRiskScore(
   address: string,
@@ -269,7 +273,7 @@ function mapTokenApprovalToItem(a: TokenApproval, index: number): ApprovalItem {
 }
 
 // Derives a 0-100 risk score (higher = riskier) from the real wallet-health
-// response — unlimited approvals are the dominant signal, other flags
+// response - unlimited approvals are the dominant signal, other flags
 // (e.g. a bad watchlist row, zero balance) add a smaller penalty each.
 function computeOverallRiskScore(approvals: ApprovalItem[], riskFlags: string[]): number {
   const unlimitedCount = approvals.filter((a) => a.isUnlimited).length;
@@ -295,6 +299,8 @@ interface SentinelStore {
   setConnectModalOpen: (open: boolean) => void;
   verifyWalletOwnership: () => Promise<void>;
   refreshBalanceUsd: () => Promise<void>;
+  handleAccountsChanged: (accounts: string[]) => Promise<void>;
+  handleChainChanged: (chainId: number) => Promise<void>;
 
   // Scanner State
   currentScanInput: string;
@@ -353,7 +359,7 @@ export const useSentinelStore = create<SentinelStore>()(
         wallet: {
           isConnected: true,
           address: result.address,
-          network: result.chainId === X_LAYER_CHAIN_ID ? 'OKX X Layer' : `Chain ${result.chainId}`,
+          network: getChainMeta(result.chainId).name,
           chainId: result.chainId,
           balanceEth: Number(formatEther(result.balanceWei, 6)),
           balanceUsd: 0,
@@ -372,7 +378,14 @@ export const useSentinelStore = create<SentinelStore>()(
             : `Connected on chain ${result.chainId}. Switch to X Layer (196) for full protection.`,
       });
 
-      // Best-effort background flows — none of these should block wallet connection.
+      // React live if the user switches accounts/chains in their wallet
+      // extension after connecting, instead of silently going stale.
+      bindWalletEvents({
+        onAccountsChanged: (accounts) => get().handleAccountsChanged(accounts),
+        onChainChanged: (chainId) => get().handleChainChanged(chainId),
+      });
+
+      // Best-effort background flows - none of these should block wallet connection.
       get().verifyWalletOwnership();
       get().fetchApprovals();
       get().refreshBalanceUsd();
@@ -392,6 +405,7 @@ export const useSentinelStore = create<SentinelStore>()(
     }
   },
   disconnectWallet: () => {
+    clearActiveProvider();
     set({ wallet: EMPTY_WALLET, activeTab: 'landing', activeScanResult: null });
     get().addToast({
       type: 'info',
@@ -433,11 +447,11 @@ export const useSentinelStore = create<SentinelStore>()(
         get().addToast({
           type: 'success',
           title: 'Wallet Verified',
-          description: 'Signature verified — ownership confirmed with replay protection.',
+          description: 'Signature verified - ownership confirmed with replay protection.',
         });
       }
     } catch {
-      // Best-effort only — a missing Supabase/RPC config or a rejected signature
+      // Best-effort only - a missing Supabase/RPC config or a rejected signature
       // should never block using the rest of the app.
     }
   },
@@ -451,9 +465,56 @@ export const useSentinelStore = create<SentinelStore>()(
         wallet: { ...state.wallet, balanceUsd: state.wallet.balanceEth * price },
       }));
     } catch {
-      // Best-effort — CoinGecko rate limits/downtime shouldn't break the app;
+      // Best-effort - CoinGecko rate limits/downtime shouldn't break the app;
       // balanceUsd just stays at its last known value (0 if never fetched).
     }
+  },
+
+  handleAccountsChanged: async (accounts) => {
+    if (!get().wallet.isConnected) return;
+
+    if (accounts.length === 0) {
+      // User disconnected/locked the wallet from the extension itself.
+      get().disconnectWallet();
+      return;
+    }
+
+    const newAddress = accounts[0];
+    if (newAddress.toLowerCase() === get().wallet.address.toLowerCase()) return;
+
+    set((state) => ({ wallet: { ...state.wallet, address: newAddress, isVerified: false } }));
+    get().addToast({
+      type: 'info',
+      title: 'Account Switched',
+      description: `Now using ${shortenAddress(newAddress)}.`,
+    });
+
+    try {
+      const balanceWei = await refreshBalance(newAddress);
+      set((state) => ({ wallet: { ...state.wallet, balanceEth: Number(formatEther(balanceWei, 6)) } }));
+    } catch {
+      // best-effort
+    }
+
+    get().verifyWalletOwnership();
+    get().fetchApprovals();
+    get().refreshBalanceUsd();
+  },
+
+  handleChainChanged: async (chainId) => {
+    if (!get().wallet.isConnected) return;
+    set((state) => ({
+      wallet: { ...state.wallet, chainId, network: getChainMeta(chainId).name },
+    }));
+    get().addToast({
+      type: chainId === X_LAYER_CHAIN_ID ? 'success' : 'warning',
+      title: 'Network Switched',
+      description:
+        chainId === X_LAYER_CHAIN_ID
+          ? 'Now on OKX X Layer.'
+          : `Now on ${getChainMeta(chainId).name}. Switch to X Layer (196) for full protection.`,
+    });
+    get().refreshBalanceUsd();
   },
 
   currentScanInput: '0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5',
@@ -465,7 +526,7 @@ export const useSentinelStore = create<SentinelStore>()(
   scanError: null,
 
   startScan: (presetKey) => {
-    // Preset demo scenarios (Dashboard shortcuts, Scanner quick-test buttons) —
+    // Preset demo scenarios (Dashboard shortcuts, Scanner quick-test buttons) -
     // instant, scripted results for showcasing the UI without needing a live
     // malicious contract on hand.
     if (presetKey && PRESET_SCANS[presetKey]) {
@@ -514,7 +575,7 @@ export const useSentinelStore = create<SentinelStore>()(
       return;
     }
 
-    // Freeform input — accepts either a 0x address/contract or a domain/URL.
+    // Freeform input - accepts either a 0x address/contract or a domain/URL.
     (async () => {
       const input = get().currentScanInput.trim();
       const isDomain = !isValidAddress(input) && isValidDomain(input);
@@ -539,7 +600,7 @@ export const useSentinelStore = create<SentinelStore>()(
 
       // Prefer the real backend pipeline (bytecode + simulation + unlimited-approval
       // + GoPlus real-world threat intel for addresses; phishing-site check for
-      // domains) — falls back to an equivalent client-side check if the backend
+      // domains) - falls back to an equivalent client-side check if the backend
       // isn't reachable/configured (e.g. no X_LAYER_RPC_URL set).
       try {
         set({ scanProgress: 50, scanStage: 'Running backend AI risk pipeline...' });
@@ -752,7 +813,7 @@ export const useSentinelStore = create<SentinelStore>()(
     }),
     {
       name: 'sentinel-settings',
-      // Only persist actual user preferences — wallet/scan/approvals/threats
+      // Only persist actual user preferences - wallet/scan/approvals/threats
       // state should always re-derive from a real connection, never be
       // faked back in from a stale localStorage snapshot.
       partialize: (state) => ({
