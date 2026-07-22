@@ -9,6 +9,7 @@
 
 import { inspectContract } from "./contractInspector";
 import { analyzeRisk } from "./riskAnalyzer";
+import { checkPhishingSite } from "../lib/goplus";
 import type { RiskScore } from "@shared/types";
 import type { TransactionRequestInput } from "../lib/xlayer/rpcClient";
 
@@ -21,4 +22,24 @@ export async function scanTransaction(
 ): Promise<RiskScore> {
   const inspection = await inspectContract(tx);
   return analyzeRisk(inspection);
+}
+
+/**
+ * Checks a domain/URL against GoPlus's phishing-site database and returns a
+ * RiskScore in the same shape as scanTransaction() — a domain isn't a
+ * blockchain address, so none of contractInspector.ts's bytecode/simulation
+ * checks apply; this is a separate, much simpler path.
+ */
+export async function scanDomain(domain: string): Promise<RiskScore> {
+  const { isPhishing, reasons } = await checkPhishingSite(domain);
+
+  if (isPhishing) {
+    return { score: 95, label: "high-risk", reasons };
+  }
+
+  return {
+    score: 0,
+    label: "safe",
+    reasons: ["No known phishing reports for this domain in GoPlus Security's database."],
+  };
 }

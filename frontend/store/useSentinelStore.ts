@@ -5,13 +5,16 @@ import type { TokenApproval } from '@shared/types';
 import {
   connect as web3Connect,
   scanAddress,
+  scanDomain,
   signMessage,
   sendTransaction,
   formatEther,
   shortenAddress,
   isValidAddress,
+  isValidDomain,
   getNativeTokenPriceUsd,
   ScanFinding,
+  DomainScanFinding,
   X_LAYER_CHAIN_ID,
 } from '../lib/web3';
 
@@ -157,6 +160,45 @@ function buildRealScanResult(address: string, finding: ScanFinding): ScanResult 
       recommendedAction: safe
         ? 'Proceed with normal caution and verify the dApp source.'
         : 'Avoid signing transactions with this address until it is verified.',
+    },
+  };
+}
+
+function buildDomainScanResult(domain: string, finding: DomainScanFinding): ScanResult {
+  const riskLevel: ScanResult['riskLevel'] = finding.isPhishing ? 'CRITICAL' : 'SAFE';
+
+  return {
+    id: `scan-domain-${domain.toLowerCase()}`,
+    targetAddress: domain,
+    targetName: 'Website / Domain',
+    network: 'GoPlus Phishing-Site Database',
+    riskScore: finding.score,
+    riskLevel,
+    scamCategory: finding.isPhishing ? 'goplus-phishing-site' : undefined,
+    estimatedValueUsd: 0,
+    gasFeeEth: 0,
+    timestamp: 'Just now',
+    checks: [
+      {
+        id: 'c1',
+        label: 'Phishing Database Match',
+        status: finding.isPhishing ? 'failed' : 'passed',
+        details: finding.isPhishing
+          ? 'This domain matches a known phishing site in GoPlus Security.'
+          : 'No match found in GoPlus Security\'s phishing-site database.',
+      },
+    ],
+    aiExplanation: {
+      whatWeFound: finding.reasons.join(' '),
+      whyItMatters: finding.isPhishing
+        ? 'This site has been reported for phishing — it likely impersonates a legitimate dApp to steal funds or credentials.'
+        : 'No phishing reports found, but absence of a report is not a guarantee of safety — always verify the URL carefully.',
+      potentialImpact: finding.isPhishing
+        ? 'Connecting a wallet or signing anything on this site could result in stolen funds.'
+        : 'Standard browsing risk applies. Double-check the domain spelling before connecting a wallet.',
+      recommendedAction: finding.isPhishing
+        ? 'Do not visit this site or connect your wallet to it.'
+        : 'Proceed with normal caution — verify this is the official domain before connecting a wallet.',
     },
   };
 }
@@ -472,15 +514,17 @@ export const useSentinelStore = create<SentinelStore>()(
       return;
     }
 
-    // Freeform input — run a real on-chain inspection via the connected wallet.
+    // Freeform input — accepts either a 0x address/contract or a domain/URL.
     (async () => {
-      const address = get().currentScanInput.trim();
-      if (!isValidAddress(address)) {
-        set({ scanError: 'Enter a valid 0x contract or wallet address.' });
+      const input = get().currentScanInput.trim();
+      const isDomain = !isValidAddress(input) && isValidDomain(input);
+
+      if (!isValidAddress(input) && !isDomain) {
+        set({ scanError: 'Enter a valid 0x contract/wallet address, or a domain (e.g. example.com).' });
         get().addToast({
           type: 'error',
-          title: 'Invalid Address',
-          description: 'Please paste a valid 0x address (42 characters).',
+          title: 'Invalid Input',
+          description: 'Please paste a valid 0x address or a domain name.',
         });
         return;
       }
@@ -488,27 +532,28 @@ export const useSentinelStore = create<SentinelStore>()(
       set({
         isScanning: true,
         scanProgress: 20,
-        scanStage: 'Fetching on-chain bytecode...',
+        scanStage: isDomain ? 'Checking phishing-site database...' : 'Fetching on-chain bytecode...',
         activeScanResult: null,
         scanError: null,
       });
 
       // Prefer the real backend pipeline (bytecode + simulation + unlimited-approval
-      // detection) — falls back to a direct wallet-RPC check if the backend isn't
-      // reachable/configured (e.g. no X_LAYER_RPC_URL set).
+      // + GoPlus real-world threat intel for addresses; phishing-site check for
+      // domains) — falls back to an equivalent client-side check if the backend
+      // isn't reachable/configured (e.g. no X_LAYER_RPC_URL set).
       try {
         set({ scanProgress: 50, scanStage: 'Running backend AI risk pipeline...' });
         const wallet = get().wallet;
         const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: wallet.address || undefined, to: address }),
+          body: JSON.stringify({ from: wallet.address || undefined, to: input }),
         });
 
         if (res.ok) {
           const risk = await res.json();
           set({ scanProgress: 90, scanStage: 'Generating Plain-English Risk Report...' });
-          const result = buildResultFromRiskScore(address, risk);
+          const result = buildResultFromRiskScore(input, risk);
           set({ isScanning: false, scanProgress: 100, scanStage: 'Scan Complete', activeScanResult: result });
           get().addToast({
             type: result.riskScore >= 40 ? 'warning' : 'success',
@@ -523,9 +568,22 @@ export const useSentinelStore = create<SentinelStore>()(
       }
 
       try {
+        if (isDomain) {
+          set({ scanProgress: 60, scanStage: 'Checking GoPlus phishing-site database directly...' });
+          const finding = await scanDomain(input);
+          const result = buildDomainScanResult(input, finding);
+          set({ isScanning: false, scanProgress: 100, scanStage: 'Scan Complete', activeScanResult: result });
+          get().addToast({
+            type: result.riskScore >= 40 ? 'warning' : 'success',
+            title: 'Scan Finished',
+            description: `Risk Score: ${result.riskScore}% (${result.riskLevel})`,
+          });
+          return;
+        }
+
         set({ scanProgress: 60, scanStage: 'Analyzing contract code directly via wallet RPC...' });
-        const finding = await scanAddress(address);
-        const result = buildRealScanResult(address, finding);
+        const finding = await scanAddress(input);
+        const result = buildRealScanResult(input, finding);
 
         set({
           isScanning: false,
@@ -545,12 +603,12 @@ export const useSentinelStore = create<SentinelStore>()(
           isScanning: false,
           scanProgress: 0,
           scanStage: 'Scan Failed',
-          scanError: code === 'NO_WALLET' ? 'Connect a wallet to run a scan.' : 'On-chain scan failed. Try again.',
+          scanError: code === 'NO_WALLET' ? 'Connect a wallet to run an address scan.' : 'Scan failed. Try again.',
         });
         get().addToast({
           type: 'error',
           title: 'Scan Failed',
-          description: code === 'NO_WALLET' ? 'Connect a wallet first.' : 'Could not read on-chain data.',
+          description: code === 'NO_WALLET' ? 'Connect a wallet first.' : 'Could not complete the scan.',
         });
       }
     })();

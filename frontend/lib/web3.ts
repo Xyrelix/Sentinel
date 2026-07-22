@@ -2,7 +2,11 @@ import { Eip1193Provider } from '../types/ethereum';
 
 export const X_LAYER_CHAIN_ID = 196;
 
-export type ContractFlag = 'not-a-contract' | 'empty-bytecode';
+export type ContractFlag =
+  | 'not-a-contract'
+  | 'empty-bytecode'
+  | 'goplus-malicious-address'
+  | 'goplus-honeypot-token';
 
 // ---------------------------------------------------------------------------
 // Chain metadata (multichain — not restricted to X Layer)
@@ -244,6 +248,14 @@ export function isValidAddress(value: string): boolean {
   return /^0x[0-9a-fA-F]{40}$/.test(value.trim());
 }
 
+/** Loose check for "this looks like a domain, not an address" — strips a protocol/path if present. */
+export function isValidDomain(value: string): boolean {
+  const trimmed = value.trim().toLowerCase();
+  if (isValidAddress(trimmed)) return false;
+  const stripped = trimmed.replace(/^https?:\/\//, '').split('/')[0];
+  return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/.test(stripped);
+}
+
 export function formatEther(wei: bigint, decimals = 4): string {
   const negative = wei < 0n;
   const abs = negative ? -wei : wei;
@@ -260,6 +272,68 @@ export function shortenAddress(address: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// GoPlus Security — client-side fallback checks
+// ---------------------------------------------------------------------------
+//
+// Same real-world threat intel as backend/lib/goplus.ts, called directly
+// from the browser for the client-only fallback path (used when /api/scan
+// is unreachable). GoPlus's public endpoints work with no key at all
+// (verified live) — only GOPLUS_API_KEY (higher rate limits) stays
+// server-side; the underlying checks work here regardless.
+
+const GOPLUS_BASE = 'https://api.gopluslabs.io/api/v1';
+const GOPLUS_XLAYER_CHAIN_ID = '196';
+
+async function checkGoPlusAddress(address: string): Promise<string[]> {
+  const flagLabels: Record<string, string> = {
+    phishing_activities: 'GoPlus: flagged for phishing activity.',
+    blackmail_activities: 'GoPlus: flagged for blackmail activity.',
+    cybercrime: 'GoPlus: flagged for cybercrime.',
+    money_laundering: 'GoPlus: flagged for money laundering.',
+    financial_crime: 'GoPlus: flagged for financial crime.',
+    stealing_attack: 'GoPlus: flagged for theft/stealing attacks.',
+    sanctioned: 'GoPlus: this address is sanctioned.',
+    mixer: 'GoPlus: associated with a mixing service.',
+    honeypot_related_address: 'GoPlus: associated with honeypot contracts.',
+  };
+  const res = await fetch(`${GOPLUS_BASE}/address_security/${address}?chain_id=${GOPLUS_XLAYER_CHAIN_ID}`);
+  if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
+  const data = await res.json();
+  const result = data?.result ?? {};
+  return Object.entries(flagLabels)
+    .filter(([key]) => result[key] === '1')
+    .map(([, label]) => label);
+}
+
+async function checkGoPlusToken(address: string): Promise<string[]> {
+  const res = await fetch(`${GOPLUS_BASE}/token_security/${GOPLUS_XLAYER_CHAIN_ID}?contract_addresses=${address}`);
+  if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
+  const data = await res.json();
+  const info = data?.result?.[address.toLowerCase()];
+  if (!info) return [];
+
+  const reasons: string[] = [];
+  if (info.is_honeypot === '1') reasons.push("GoPlus: this token is flagged as a honeypot (can buy, can't sell).");
+  if (info.cannot_sell_all === '1') reasons.push('GoPlus: holders cannot sell their full balance.');
+  if (info.hidden_owner === '1') reasons.push('GoPlus: contract has a hidden owner.');
+  const sellTax = Number(info.sell_tax ?? 0);
+  if (sellTax > 0.15) reasons.push(`GoPlus: high sell tax (${(sellTax * 100).toFixed(1)}%).`);
+  return reasons;
+}
+
+/** Checks a domain/URL against GoPlus's phishing-site database — no wallet or RPC needed. */
+export async function checkPhishingSiteClient(domain: string): Promise<{ isPhishing: boolean; reasons: string[] }> {
+  const res = await fetch(`${GOPLUS_BASE}/phishing_site?url=${encodeURIComponent(domain)}`);
+  if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
+  const data = await res.json();
+  const isPhishing = data?.result?.phishing_site === 1;
+  return {
+    isPhishing,
+    reasons: isPhishing ? ['GoPlus: this domain is flagged as a known phishing site.'] : [],
+  };
+}
+
+// ---------------------------------------------------------------------------
 // On-chain scan
 // ---------------------------------------------------------------------------
 
@@ -268,6 +342,8 @@ const SUSPICIOUS_BYTECODE_THRESHOLD = 32;
 const FLAG_WEIGHTS: Record<ContractFlag, number> = {
   'not-a-contract': 60,
   'empty-bytecode': 35,
+  'goplus-malicious-address': 85,
+  'goplus-honeypot-token': 80,
 };
 
 const FLAG_REASONS: Record<ContractFlag, string> = {
@@ -275,6 +351,10 @@ const FLAG_REASONS: Record<ContractFlag, string> = {
     "The target address has no contract code — it's a regular wallet, not the token or dApp it may claim to be.",
   'empty-bytecode':
     "The contract's code is unusually small for what it claims to do — a common sign of a hastily deployed scam contract.",
+  'goplus-malicious-address':
+    'This address matches known malicious activity in GoPlus Security real-world threat intelligence.',
+  'goplus-honeypot-token':
+    "GoPlus Security's token analysis flagged this contract with honeypot or scam-tax characteristics.",
 };
 
 export interface ScanFinding {
@@ -293,13 +373,16 @@ function scoreToLabel(score: number): ScanFinding['label'] {
 }
 
 // Reads live on-chain state via the connected provider and derives an honest
-// risk finding. No indexer/API — only what an RPC node knows.
+// risk finding, enriched with GoPlus real-world threat intel (best-effort —
+// GoPlus downtime never breaks a scan). No indexer — only what an RPC node
+// and GoPlus's public API know.
 export async function scanAddress(address: string): Promise<ScanFinding> {
   const provider = getInjectedProvider();
   if (!provider) throw new Error('NO_WALLET');
   if (!isValidAddress(address)) throw new Error('INVALID_ADDRESS');
 
   const flags: ContractFlag[] = [];
+  const externalReasons: string[] = [];
 
   const bytecode = await provider.request<string>({
     method: 'eth_getCode',
@@ -314,16 +397,60 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
     flags.push('empty-bytecode');
   }
 
+  try {
+    const addressFindings = await checkGoPlusAddress(address);
+    if (addressFindings.length > 0) {
+      flags.push('goplus-malicious-address');
+      externalReasons.push(...addressFindings);
+    }
+  } catch {
+    // best-effort — ignore
+  }
+
+  if (isContract) {
+    try {
+      const tokenFindings = await checkGoPlusToken(address);
+      if (tokenFindings.length > 0) {
+        flags.push('goplus-honeypot-token');
+        externalReasons.push(...tokenFindings);
+      }
+    } catch {
+      // best-effort — ignore
+    }
+  }
+
   const reasons: string[] = [];
   let score = 0;
   for (const flag of flags) {
     score += FLAG_WEIGHTS[flag];
     reasons.push(FLAG_REASONS[flag]);
   }
+  reasons.push(...externalReasons);
   score = Math.min(score, 100);
   if (reasons.length === 0) {
     reasons.push('No known risk patterns detected from on-chain code inspection.');
   }
 
   return { score, label: scoreToLabel(score), isContract, bytecodeSize, flags, reasons };
+}
+
+export interface DomainScanFinding {
+  score: number;
+  label: 'safe' | 'caution' | 'high-risk';
+  isPhishing: boolean;
+  reasons: string[];
+}
+
+/** Checks a domain against GoPlus's phishing-site database. No wallet or RPC needed — works even when disconnected. */
+export async function scanDomain(domain: string): Promise<DomainScanFinding> {
+  const { isPhishing, reasons } = await checkPhishingSiteClient(domain);
+  if (isPhishing) {
+    return { score: 95, label: 'high-risk', isPhishing, reasons };
+  }
+  return {
+    score: 0,
+    label: 'safe',
+    isPhishing,
+    reasons: ["No known phishing reports for this domain in GoPlus Security's database."],
+  };
 }

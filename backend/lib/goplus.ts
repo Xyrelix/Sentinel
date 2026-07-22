@@ -96,3 +96,26 @@ export async function checkTokenSecurity(address: string): Promise<TokenSecurity
 
   return { isHoneypot: reasons.length > 0, reasons };
 }
+
+export interface PhishingSiteResult {
+  isPhishing: boolean;
+  reasons: string[];
+}
+
+/** Checks a domain/URL against GoPlus's phishing-site database. Throws on request failure — best-effort, callers should catch. */
+export async function checkPhishingSite(url: string): Promise<PhishingSiteResult> {
+  const res = await fetch(`${GOPLUS_BASE}/phishing_site?url=${encodeURIComponent(url)}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) {
+    throw new Error(`GoPlus phishing_site request failed with status ${res.status}`);
+  }
+
+  const data = await res.json();
+  const isPhishing = data?.result?.phishing_site === 1;
+
+  return {
+    isPhishing,
+    reasons: isPhishing ? ["GoPlus: this domain is flagged as a known phishing site."] : [],
+  };
+}

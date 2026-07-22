@@ -54,3 +54,16 @@ export function isUnlimitedAmount(amount: bigint): boolean {
 export function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+/**
+ * Loose check for "this looks like a domain, not a blockchain address" —
+ * used by api/scan.ts to route between the address pipeline
+ * (contractInspector.ts) and the domain/phishing-site pipeline
+ * (scamDetectionAgent.ts's scanDomain). Strips a protocol/path if present.
+ */
+export function isLikelyDomain(value: string): boolean {
+  const trimmed = value.trim().toLowerCase();
+  if (trimmed.startsWith("0x")) return false;
+  const stripped = trimmed.replace(/^https?:\/\//, "").split("/")[0];
+  return /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/.test(stripped);
+}
