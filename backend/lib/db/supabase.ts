@@ -1,14 +1,21 @@
 ﻿/**
  * lib/db/supabase.ts
  *
- * Supabase client + typed queries. This is what unblocks WATCHED_PAIRS in
- * api/walletHealth.ts — instead of a hardcoded array, the watchlist lives
- * in a `watched_pairs` table and can be updated without a code deploy.
+ * Supabase client + typed queries.
+ *
+ * Two tables in use:
+ *   - watched_pairs — token/spender pairs to check wallet approvals
+ *     against, used by api/walletHealth.ts (replaces the old hardcoded
+ *     WATCHED_PAIRS array).
+ *   - auth_nonces — single-use, expiring nonces for wallet-signature
+ *     authentication, used by lib/okx/walletSdk.ts to prevent signature
+ *     replay attacks.
  *
  * Requires SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.
  */
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
 import type { Address } from "viem";
 
 let client: SupabaseClient | null = null;
@@ -51,8 +58,7 @@ export interface WatchedPair {
 
 /**
  * Fetches the current watchlist of token/spender pairs to check wallet
- * approvals against. Used by api/walletHealth.ts in place of the old
- * hardcoded WATCHED_PAIRS array.
+ * approvals against. Used by api/walletHealth.ts.
  */
 export async function getWatchedPairs(): Promise<WatchedPair[]> {
   const supabase = getSupabaseClient();
@@ -87,4 +93,76 @@ export async function addWatchedPair(pair: WatchedPair): Promise<void> {
   if (error) {
     throw new Error(`Failed to add watched pair: ${error.message}`);
   }
+}
+
+// ---------------------------------------------------------------------------
+// auth_nonces table
+// ---------------------------------------------------------------------------
+//
+// Schema (create in Supabase SQL editor):
+//
+// create table auth_nonces (
+//   nonce text primary key,
+//   address text not null,
+//   used boolean not null default false,
+//   expires_at timestamptz not null,
+//   created_at timestamptz default now()
+// );
+
+const NONCE_TTL_MINUTES = 5;
+
+/**
+ * Generates and stores a fresh nonce for a wallet address, to be embedded
+ * in the message the user signs. Expires after NONCE_TTL_MINUTES.
+ * Used by lib/okx/walletSdk.ts's startWalletAuth().
+ */
+export async function createNonce(address: string): Promise<string> {
+  const supabase = getSupabaseClient();
+  const nonce = randomUUID();
+  const expiresAt = new Date(
+    Date.now() + NONCE_TTL_MINUTES * 60 * 1000
+  ).toISOString();
+
+  const { error } = await supabase.from("auth_nonces").insert({
+    nonce,
+    address,
+    expires_at: expiresAt,
+  });
+
+  if (error) {
+    throw new Error(`Failed to create nonce: ${error.message}`);
+  }
+
+  return nonce;
+}
+
+/**
+ * Validates a nonce: must exist, match the claimed address, be unused,
+ * and not be expired. Marks it used atomically on success so it can never
+ * be replayed — a signature captured once can't be reused for a second
+ * "session." Used by lib/okx/walletSdk.ts's verifyWalletSignature().
+ */
+export async function consumeNonce(
+  nonce: string,
+  address: string
+): Promise<boolean> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("auth_nonces")
+    .select("address, used, expires_at")
+    .eq("nonce", nonce)
+    .single();
+
+  if (error || !data) return false;
+  if (data.used) return false;
+  if (data.address.toLowerCase() !== address.toLowerCase()) return false;
+  if (new Date(data.expires_at) < new Date()) return false;
+
+  const { error: updateError } = await supabase
+    .from("auth_nonces")
+    .update({ used: true })
+    .eq("nonce", nonce);
+
+  return !updateError;
 }

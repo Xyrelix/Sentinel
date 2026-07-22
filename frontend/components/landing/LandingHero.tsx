@@ -105,7 +105,7 @@ export const LandingHero: React.FC = () => {
         >
           <div className="p-1.5">
             <p className="text-xl sm:text-3xl font-black text-white">
-              <AnimatedNumber value={142850} prefix="$" suffix="M+" />
+              <AnimatedNumber value={142850} prefix="$" suffix="+" />
             </p>
             <p className="text-[10px] sm:text-xs text-accent mt-0.5 font-medium uppercase tracking-wider">Protected Value</p>
           </div>
