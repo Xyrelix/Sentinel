@@ -238,7 +238,7 @@ export const WalletHealthView: React.FC = () => {
 
             <div className="h-48 mt-4 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <RechartsPieChart>
                   <Pie
                     data={tokenHoldings}
                     cx="50%"

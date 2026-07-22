@@ -22,15 +22,17 @@ import type { Address } from "viem";
 
 let client: SupabaseClient | null = null;
 
-// Accepts either name — SUPABASE_ANON_KEY (Supabase's own convention) or
-// SUPABASE_API_KEY (this project's .env uses the latter).
-const supabaseKey = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_API_KEY;
+// Accepts any of: SUPABASE_ANON_KEY (legacy JWT-based anon key),
+// SUPABASE_API_KEY (an earlier rename in this project's .env), or
+// SUPABASE_API (Supabase's newer "publishable" key format, sb_publishable_...).
+const supabaseKey =
+  process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_API_KEY ?? process.env.SUPABASE_API;
 
 /** Returns a singleton Supabase client. */
 export function getSupabaseClient(): SupabaseClient {
   if (!process.env.SUPABASE_URL || !supabaseKey) {
     throw new Error(
-      "SUPABASE_URL and SUPABASE_ANON_KEY (or SUPABASE_API_KEY) must be set in backend/.env.local"
+      "SUPABASE_URL and SUPABASE_ANON_KEY (or SUPABASE_API_KEY / SUPABASE_API) must be set in backend/.env.local"
     );
   }
   if (!client) {
