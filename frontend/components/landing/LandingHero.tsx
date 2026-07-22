@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Scan, Sparkles, Lock, ArrowRight, Activity, Cpu, CheckCircle2, Zap } from 'lucide-react';
+import { Shield, Scan, Sparkles, Lock, ArrowRight, Activity, Cpu, CheckCircle2, Zap, Wallet } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 import { AnimatedText } from '../ui/AnimatedText';
@@ -10,7 +10,9 @@ import { TextShimmer } from '../ui/TextShimmer';
 
 export const LandingHero: React.FC = () => {
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
-  const startScan = useSentinelStore((state) => state.startScan);
+  const connectWallet = useSentinelStore((state) => state.connectWallet);
+  const isConnected = useSentinelStore((state) => state.wallet.isConnected);
+  const isConnecting = useSentinelStore((state) => state.isConnecting);
 
   const partners = [
     { name: 'OpenAI', role: 'LLM Threat Reasoning', icon: '🤖' },
@@ -72,25 +74,26 @@ export const LandingHero: React.FC = () => {
           transition={{ delay: 0.3 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto pt-2"
         >
-          <button
-            onClick={() => {
-              setActiveTab('scanner');
-              startScan('drainer');
-            }}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
-          >
-            <Scan className="w-4 h-4" />
-            <span>Launch AI Scanner</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#111111] border border-[#1E1E1E] hover:border-white/20 text-white font-semibold text-sm hover:bg-[#161616] transition-all cursor-pointer"
-          >
-            <Activity className="w-4 h-4 text-accent" />
-            <span>View Dashboard</span>
-          </button>
+          {isConnected ? (
+            <button
+              onClick={() => setActiveTab('scanner')}
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
+            >
+              <Scan className="w-4 h-4" />
+              <span>Launch AI Scanner</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              onClick={connectWallet}
+              disabled={isConnecting}
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all cursor-pointer"
+            >
+              <Wallet className="w-4 h-4" />
+              <span>{isConnecting ? 'Connecting...' : 'Connect Wallet to Start'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          )}
         </motion.div>
 
         {/* Centralized Live Stats Bar */}

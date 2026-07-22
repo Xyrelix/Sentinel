@@ -16,16 +16,31 @@ export function Navbar() {
   const activeTab = useSentinelStore((state) => state.activeTab);
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
   const wallet = useSentinelStore((state) => state.wallet);
-  const setConnectModalOpen = useSentinelStore((state) => state.setConnectModalOpen);
+  const isConnecting = useSentinelStore((state) => state.isConnecting);
+  const connectWallet = useSentinelStore((state) => state.connectWallet);
+  const disconnectWallet = useSentinelStore((state) => state.disconnectWallet);
 
-  const links: { id: NavTab; label: string }[] = [
-    { id: 'landing', label: 'Overview' },
-    { id: 'dashboard', label: 'Dashboard' },
-    { id: 'scanner', label: 'AI Scanner' },
-    { id: 'wallet', label: 'Wallet Health' },
-    { id: 'approvals', label: 'Approvals' },
-    { id: 'community', label: 'Threat Intel' },
-  ];
+  const links: { id: NavTab; label: string }[] = wallet.isConnected
+    ? [
+        { id: 'landing', label: 'Overview' },
+        { id: 'scanner', label: 'AI Scanner' },
+        { id: 'wallet', label: 'Wallet Health' },
+      ]
+    : [];
+
+  const walletLabel = wallet.isConnected
+    ? `${wallet.address.slice(0, 6)}...${wallet.address.slice(-4)}`
+    : isConnecting
+    ? 'Connecting...'
+    : 'Connect Wallet';
+
+  const handleWalletClick = () => {
+    if (wallet.isConnected) {
+      disconnectWallet();
+    } else {
+      connectWallet();
+    }
+  };
 
   React.useEffect(() => {
     if (open) {
@@ -105,11 +120,12 @@ export function Navbar() {
         <div className="hidden items-center gap-2 md:flex">
           <Button
             size="sm"
-            onClick={() => setConnectModalOpen(true)}
+            onClick={handleWalletClick}
+            disabled={isConnecting}
             className="flex items-center gap-2 text-xs font-bold bg-gradient-to-r from-primary to-red-600 text-white shadow-red-glow hover:shadow-red-glow-lg cursor-pointer"
           >
             <Wallet className="w-3.5 h-3.5" />
-            <span>{wallet.isConnected ? wallet.address : 'Connect Wallet'}</span>
+            <span>{walletLabel}</span>
             <ChevronRight className="w-3 h-3 opacity-70" />
           </Button>
         </div>
@@ -159,13 +175,14 @@ export function Navbar() {
           <div className="flex flex-col gap-2 pt-4 border-t border-[#1E1E1E]">
             <Button
               onClick={() => {
-                setConnectModalOpen(true);
+                handleWalletClick();
                 setOpen(false);
               }}
+              disabled={isConnecting}
               className="w-full text-xs font-bold bg-gradient-to-r from-primary to-red-600 text-white shadow-red-glow"
             >
               <Wallet className="w-4 h-4 mr-2" />
-              {wallet.isConnected ? wallet.address : 'Connect Wallet'}
+              {walletLabel}
             </Button>
           </div>
         </div>

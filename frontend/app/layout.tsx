@@ -5,7 +5,6 @@ import './globals.css';
 import { DottedSurface } from '../components/ui/dotted-surface';
 import { CustomCursor } from '../components/ui/CustomCursor';
 import { ToastContainer } from '../components/ui/Toast';
-import { ConnectWalletModal } from '../components/wallet/ConnectWalletModal';
 
 // Body / UI — invisible, screen-optimized workhorse (matches Rabby, revoke.cash body)
 const inter = Inter({
@@ -69,7 +68,6 @@ export default function RootLayout({
           </div>
         </footer>
 
-        <ConnectWalletModal />
         <ToastContainer />
       </body>
     </html>

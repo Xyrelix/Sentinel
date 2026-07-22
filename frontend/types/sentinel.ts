@@ -1,11 +1,8 @@
-export type NavTab = 
-  | 'landing' 
-  | 'dashboard' 
-  | 'scanner' 
-  | 'wallet' 
-  | 'approvals' 
-  | 'community' 
-  | 'reports' 
+export type NavTab =
+  | 'landing'
+  | 'scanner'
+  | 'wallet'
+  | 'reports'
   | 'settings';
 
 export type RiskLevel = 'SAFE' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';

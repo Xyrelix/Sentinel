@@ -29,6 +29,7 @@ export const TransactionScannerView: React.FC = () => {
   const scanProgress = useSentinelStore((state) => state.scanProgress);
   const scanStage = useSentinelStore((state) => state.scanStage);
   const activeScanResult = useSentinelStore((state) => state.activeScanResult);
+  const scanError = useSentinelStore((state) => state.scanError);
   const startScan = useSentinelStore((state) => state.startScan);
 
   const [activeAccordion, setActiveAccordion] = useState<string | null>('what');
@@ -77,7 +78,7 @@ export const TransactionScannerView: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               disabled={isScanning}
-              onClick={() => startScan('drainer')}
+              onClick={() => startScan()}
               className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg disabled:opacity-50 transition-all shrink-0"
             >
               {isScanning ? (
@@ -94,37 +95,9 @@ export const TransactionScannerView: React.FC = () => {
             </motion.button>
           </div>
 
-          {/* Preset Buttons */}
-          <div className="flex flex-wrap items-center gap-2 pt-2">
-            <span className="text-xs text-accent font-medium mr-2">Preset Test Cases:</span>
-            <button
-              onClick={() => {
-                setCurrentScanInput('0x95222290DD7278Aa3Ddd389Cc1E1d165CC4BAfe5');
-                startScan('drainer');
-              }}
-              className="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/30 text-primary text-xs font-semibold hover:bg-primary/20 transition-all"
-            >
-              🚨 Permit2 Drainer (96%)
-            </button>
-            <button
-              onClick={() => {
-                setCurrentScanInput('0x498b8c56858e70a1a0937a09d3b1dbdbfef52b21');
-                startScan('honeypot');
-              }}
-              className="px-3 py-1.5 rounded-lg bg-warning/10 border border-warning/30 text-warning text-xs font-semibold hover:bg-warning/20 transition-all"
-            >
-              ⚠️ Honeypot Token (88%)
-            </button>
-            <button
-              onClick={() => {
-                setCurrentScanInput('0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45');
-                startScan('safe');
-              }}
-              className="px-3 py-1.5 rounded-lg bg-success/10 border border-success/30 text-success text-xs font-semibold hover:bg-success/20 transition-all"
-            >
-              ✅ Verified Uniswap V3 (8%)
-            </button>
-          </div>
+          {scanError && (
+            <p className="text-xs text-primary font-semibold pt-1">{scanError}</p>
+          )}
         </div>
       </GlowCard>
 

@@ -5,31 +5,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSentinelStore } from '../store/useSentinelStore';
 import { Navbar } from '../components/layout/Navbar';
 import { LandingHero } from '../components/landing/LandingHero';
-import { DashboardView } from '../components/dashboard/DashboardView';
 import { TransactionScannerView } from '../components/scanner/TransactionScannerView';
 import { WalletHealthView } from '../components/wallet/WalletHealthView';
-import { ApprovalManagerView } from '../components/approvals/ApprovalManagerView';
-import { ThreatIntelView } from '../components/community/ThreatIntelView';
 import { ReportsView } from '../components/reports/ReportsView';
 import { SettingsView } from '../components/settings/SettingsView';
 
 export default function Home() {
   const activeTab = useSentinelStore((state) => state.activeTab);
+  const isConnected = useSentinelStore((state) => state.wallet.isConnected);
 
   const renderActiveView = () => {
+    if (!isConnected) {
+      return <LandingHero />;
+    }
+
     switch (activeTab) {
       case 'landing':
         return <LandingHero />;
-      case 'dashboard':
-        return <DashboardView />;
       case 'scanner':
         return <TransactionScannerView />;
       case 'wallet':
         return <WalletHealthView />;
-      case 'approvals':
-        return <ApprovalManagerView />;
-      case 'community':
-        return <ThreatIntelView />;
       case 'reports':
         return <ReportsView />;
       case 'settings':
@@ -45,7 +41,7 @@ export default function Home() {
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={activeTab}
+          key={isConnected ? activeTab : 'landing'}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
