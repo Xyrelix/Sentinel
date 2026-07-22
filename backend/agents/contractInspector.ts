@@ -39,9 +39,18 @@ const ERC20_APPROVE_ABI = [
 /**
  * Inspects the target of an unsigned transaction and returns raw findings.
  * Never broadcasts anything - only reads on-chain state and simulates.
+ *
+ * NOTE on multichain scope: bytecode/simulation checks below always run
+ * against X Layer (the only chain this backend has an RPC client for) -
+ * that's a real infrastructure boundary, not something chainId can change.
+ * The GoPlus/Chainabuse threat-intel checks, however, are plain external
+ * API lookups with no such constraint, so chainId is threaded through to
+ * those specifically - pass the actual chain the target address lives on
+ * (e.g. the connected wallet's current chain) for a correct match.
  */
 export async function inspectContract(
-  tx: TransactionRequestInput
+  tx: TransactionRequestInput,
+  chainId?: string | number
 ): Promise<ContractInspectionResult> {
   if (!isAddress(tx.to, { strict: false })) {
     throw new Error(`Invalid target address: ${tx.to}`);
@@ -86,7 +95,7 @@ export async function inspectContract(
   const externalFindings: string[] = [];
 
   try {
-    const addressCheck = await checkAddressSecurity(tx.to);
+    const addressCheck = await checkAddressSecurity(tx.to, chainId);
     if (addressCheck.isMalicious) {
       flags.push("goplus-malicious-address");
       externalFindings.push(...addressCheck.reasons);
@@ -97,7 +106,7 @@ export async function inspectContract(
 
   if (contractInfo.isContract) {
     try {
-      const tokenCheck = await checkTokenSecurity(tx.to);
+      const tokenCheck = await checkTokenSecurity(tx.to, chainId);
       if (tokenCheck.isHoneypot) {
         flags.push("goplus-honeypot-token");
         externalFindings.push(...tokenCheck.reasons);

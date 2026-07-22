@@ -283,9 +283,12 @@ export function shortenAddress(address: string): string {
 // server-side; the underlying checks work here regardless.
 
 const GOPLUS_BASE = 'https://api.gopluslabs.io/api/v1';
-const GOPLUS_XLAYER_CHAIN_ID = '196';
+// X Layer is this app's default/main chain, but every check below takes an
+// explicit chainId - GoPlus supports dozens of chains, so scanAddress()
+// passes whatever chain the connected wallet is actually on.
+export const GOPLUS_DEFAULT_CHAIN_ID = X_LAYER_CHAIN_ID;
 
-async function checkGoPlusAddress(address: string): Promise<string[]> {
+async function checkGoPlusAddress(address: string, chainId: number = GOPLUS_DEFAULT_CHAIN_ID): Promise<string[]> {
   const flagLabels: Record<string, string> = {
     phishing_activities: 'GoPlus: flagged for phishing activity.',
     blackmail_activities: 'GoPlus: flagged for blackmail activity.',
@@ -297,7 +300,7 @@ async function checkGoPlusAddress(address: string): Promise<string[]> {
     mixer: 'GoPlus: associated with a mixing service.',
     honeypot_related_address: 'GoPlus: associated with honeypot contracts.',
   };
-  const res = await fetch(`${GOPLUS_BASE}/address_security/${address}?chain_id=${GOPLUS_XLAYER_CHAIN_ID}`);
+  const res = await fetch(`${GOPLUS_BASE}/address_security/${address}?chain_id=${chainId}`);
   if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
   const data = await res.json();
   const result = data?.result ?? {};
@@ -306,8 +309,8 @@ async function checkGoPlusAddress(address: string): Promise<string[]> {
     .map(([, label]) => label);
 }
 
-async function checkGoPlusToken(address: string): Promise<string[]> {
-  const res = await fetch(`${GOPLUS_BASE}/token_security/${GOPLUS_XLAYER_CHAIN_ID}?contract_addresses=${address}`);
+async function checkGoPlusToken(address: string, chainId: number = GOPLUS_DEFAULT_CHAIN_ID): Promise<string[]> {
+  const res = await fetch(`${GOPLUS_BASE}/token_security/${chainId}?contract_addresses=${address}`);
   if (!res.ok) throw new Error('GOPLUS_REQUEST_FAILED');
   const data = await res.json();
   const info = data?.result?.[address.toLowerCase()];
@@ -416,7 +419,9 @@ function scoreToLabel(score: number): ScanFinding['label'] {
 // Reads live on-chain state via the connected provider and derives an honest
 // risk finding, enriched with GoPlus real-world threat intel (best-effort -
 // GoPlus downtime never breaks a scan). No indexer - only what an RPC node
-// and GoPlus's public API know.
+// and GoPlus's public API know. Works across whatever chain the wallet is
+// actually connected to, not just X Layer - both the bytecode read and the
+// GoPlus checks use the wallet's current chain.
 export async function scanAddress(address: string): Promise<ScanFinding> {
   const provider = getInjectedProvider();
   if (!provider) throw new Error('NO_WALLET');
@@ -425,10 +430,11 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
   const flags: ContractFlag[] = [];
   const externalReasons: string[] = [];
 
-  const bytecode = await provider.request<string>({
-    method: 'eth_getCode',
-    params: [address, 'latest'],
-  });
+  const [bytecode, chainIdHex] = await Promise.all([
+    provider.request<string>({ method: 'eth_getCode', params: [address, 'latest'] }),
+    provider.request<string>({ method: 'eth_chainId' }),
+  ]);
+  const chainId = parseInt(chainIdHex, 16);
   const isContract = Boolean(bytecode && bytecode !== '0x');
   const bytecodeSize = isContract ? (bytecode.length - 2) / 2 : 0;
 
@@ -439,7 +445,7 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
   }
 
   try {
-    const addressFindings = await checkGoPlusAddress(address);
+    const addressFindings = await checkGoPlusAddress(address, chainId);
     if (addressFindings.length > 0) {
       flags.push('goplus-malicious-address');
       externalReasons.push(...addressFindings);
@@ -450,7 +456,7 @@ export async function scanAddress(address: string): Promise<ScanFinding> {
 
   if (isContract) {
     try {
-      const tokenFindings = await checkGoPlusToken(address);
+      const tokenFindings = await checkGoPlusToken(address, chainId);
       if (tokenFindings.length > 0) {
         flags.push('goplus-honeypot-token');
         externalReasons.push(...tokenFindings);

@@ -608,7 +608,7 @@ export const useSentinelStore = create<SentinelStore>()(
         const res = await fetch('/api/scan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: wallet.address || undefined, to: input }),
+          body: JSON.stringify({ from: wallet.address || undefined, to: input, chainId: wallet.chainId }),
         });
 
         if (res.ok) {

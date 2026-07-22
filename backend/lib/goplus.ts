@@ -11,11 +11,13 @@
 
 const GOPLUS_BASE = "https://api.gopluslabs.io/api/v1";
 
-// GoPlus only tracks X Layer Mainnet (chain id 196) - used for threat-intel
-// lookups regardless of which X Layer network (main/test) the rest of the
-// scan pipeline reads bytecode from, since real-world scam intelligence is
-// inherently about mainnet activity.
-const GOPLUS_XLAYER_CHAIN_ID = "196";
+// X Layer Mainnet is the default/main chain for this app, but every
+// GoPlus check below accepts an explicit chainId so callers can check
+// whatever chain is actually relevant (e.g. the connected wallet's current
+// chain) - GoPlus supports dozens of chains (Ethereum, BSC, Polygon, Base,
+// Arbitrum, etc.), this was never a GoPlus limitation, just an unnecessary
+// hardcode here.
+export const DEFAULT_CHAIN_ID = "196";
 
 function authHeaders(): Record<string, string> {
   return process.env.GOPLUS_API_KEY ? { Authorization: `Bearer ${process.env.GOPLUS_API_KEY}` } : {};
@@ -41,10 +43,13 @@ const ADDRESS_FLAG_LABELS: Record<string, string> = {
   honeypot_related_address: "GoPlus: associated with honeypot contracts.",
 };
 
-/** Checks an address against GoPlus's aggregated malicious-address intelligence. Throws on request failure - best-effort, callers should catch. */
-export async function checkAddressSecurity(address: string): Promise<AddressSecurityResult> {
+/** Checks an address against GoPlus's aggregated malicious-address intelligence for the given chain (defaults to X Layer). Throws on request failure - best-effort, callers should catch. */
+export async function checkAddressSecurity(
+  address: string,
+  chainId: string | number = DEFAULT_CHAIN_ID
+): Promise<AddressSecurityResult> {
   const res = await fetch(
-    `${GOPLUS_BASE}/address_security/${address}?chain_id=${GOPLUS_XLAYER_CHAIN_ID}`,
+    `${GOPLUS_BASE}/address_security/${address}?chain_id=${chainId}`,
     { headers: authHeaders() }
   );
   if (!res.ok) {
@@ -68,10 +73,13 @@ export interface TokenSecurityResult {
 
 const HIGH_TAX_THRESHOLD = 0.15;
 
-/** Checks a token contract against GoPlus's token-security analysis (honeypot, tax, mint, hidden owner). Throws on request failure - best-effort, callers should catch. */
-export async function checkTokenSecurity(address: string): Promise<TokenSecurityResult> {
+/** Checks a token contract against GoPlus's token-security analysis (honeypot, tax, mint, hidden owner) for the given chain (defaults to X Layer). Throws on request failure - best-effort, callers should catch. */
+export async function checkTokenSecurity(
+  address: string,
+  chainId: string | number = DEFAULT_CHAIN_ID
+): Promise<TokenSecurityResult> {
   const res = await fetch(
-    `${GOPLUS_BASE}/token_security/${GOPLUS_XLAYER_CHAIN_ID}?contract_addresses=${address}`,
+    `${GOPLUS_BASE}/token_security/${chainId}?contract_addresses=${address}`,
     { headers: authHeaders() }
   );
   if (!res.ok) {

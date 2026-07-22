@@ -17,11 +17,15 @@ import type { TransactionRequestInput } from "../lib/xlayer/rpcClient";
 /**
  * Runs the full pre-signature scam-detection pipeline on an unsigned
  * transaction and returns a RiskScore ready for the frontend to render.
+ * chainId (optional, defaults to X Layer) is passed through to the
+ * GoPlus/Chainabuse threat-intel checks - see contractInspector.ts for why
+ * bytecode/simulation checks can't follow the same flexibility.
  */
 export async function scanTransaction(
-  tx: TransactionRequestInput
+  tx: TransactionRequestInput,
+  chainId?: string | number
 ): Promise<RiskScore> {
-  const inspection = await inspectContract(tx);
+  const inspection = await inspectContract(tx, chainId);
   return analyzeRisk(inspection);
 }
 

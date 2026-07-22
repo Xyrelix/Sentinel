@@ -16,13 +16,16 @@ export const POST = withLogging('scan', async (request: Request) => {
       return Response.json(result);
     }
 
-    const result = await scanTransaction({
-      from: body.from ?? '0x0000000000000000000000000000000000dEaD',
-      to: body.to,
-      data: body.data ?? '0x',
-      value: body.value ? BigInt(body.value) : 0n,
-    });
-    logger.info('scan.completed', { target: body.to, score: result.score, label: result.label });
+    const result = await scanTransaction(
+      {
+        from: body.from ?? '0x0000000000000000000000000000000000dEaD',
+        to: body.to,
+        data: body.data ?? '0x',
+        value: body.value ? BigInt(body.value) : 0n,
+      },
+      body.chainId
+    );
+    logger.info('scan.completed', { target: body.to, chainId: body.chainId, score: result.score, label: result.label });
     return Response.json(result);
   } catch (err) {
     logger.error('scan.failed', {
