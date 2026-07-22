@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Wallet, ChevronRight } from 'lucide-react';
 import { Button, buttonVariants } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
 import { useScroll } from '@/components/ui/use-scroll';
 import { cn } from '@/lib/utils';
@@ -127,9 +127,9 @@ export function Navbar() {
             disabled={isConnecting}
             className="flex items-center gap-2 text-xs font-bold bg-gradient-to-r from-primary to-red-600 text-white shadow-red-glow hover:shadow-red-glow-lg cursor-pointer"
           >
-            <Wallet className="w-3.5 h-3.5" />
+            <Icon name="wallet" className="w-3.5 h-3.5" />
             <span>{walletLabel}</span>
-            <ChevronRight className="w-3 h-3 opacity-70" />
+            <Icon name="chevron-right" className="w-3 h-3 opacity-70" />
           </Button>
         </div>
 
@@ -184,7 +184,7 @@ export function Navbar() {
               disabled={isConnecting}
               className="w-full text-xs font-bold bg-gradient-to-r from-primary to-red-600 text-white shadow-red-glow"
             >
-              <Wallet className="w-4 h-4 mr-2" />
+              <Icon name="wallet" className="w-4 h-4 mr-2" />
               {walletLabel}
             </Button>
           </div>

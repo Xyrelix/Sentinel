@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="Layer logo">
+  <title>Layer</title>
+  <g fill="#ffffff">
+    <rect x="0" y="0" width="20" height="20" />
+    <rect x="24" y="0" width="20" height="20" />
+    <rect x="0" y="24" width="20" height="20" />
+    <rect x="24" y="24" width="20" height="20" />
+    <rect x="0" y="48" width="20" height="20" />
+    <rect x="24" y="48" width="20" height="20" />
+    <rect x="54" y="0" width="10" height="48" />
+    <rect x="68" y="0" width="10" height="48" />
+    <rect x="82" y="0" width="10" height="48" />
+  </g>
+  <text x="106" y="46" font-family="Inter, Arial, sans-serif" font-size="40" font-weight="700" fill="#ffffff">Layer</text>
+</svg>

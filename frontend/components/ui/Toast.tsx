@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, AlertTriangle, AlertOctagon, Info, X } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
+import { Icon } from './Icon';
 
 export const ToastContainer: React.FC = () => {
   const toasts = useSentinelStore((state) => state.toasts);
@@ -12,13 +12,13 @@ export const ToastContainer: React.FC = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return <ShieldCheck className="w-5 h-5 text-success" />;
+        return <Icon name="shield-check" color="%2322C55E" className="w-5 h-5" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-warning" />;
+        return <Icon name="alert-triangle" color="%23FACC15" className="w-5 h-5" />;
       case 'error':
-        return <AlertOctagon className="w-5 h-5 text-primary" />;
+        return <Icon name="alert-octagon" color="%23FF3B30" className="w-5 h-5" />;
       default:
-        return <Info className="w-5 h-5 text-accent" />;
+        return <Icon name="info" color="%23A1A1AA" className="w-5 h-5" />;
     }
   };
 
@@ -62,7 +62,7 @@ export const ToastContainer: React.FC = () => {
               onClick={() => removeToast(toast.id)}
               className="text-accent hover:text-white transition-colors"
             >
-              <X className="w-4 h-4" />
+              <Icon name="x" className="w-4 h-4" />
             </button>
           </motion.div>
         ))}

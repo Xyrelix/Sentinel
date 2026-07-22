@@ -2,24 +2,11 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Scan,
-  ShieldAlert,
-  ShieldCheck,
-  Zap,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  Info,
-  ChevronDown,
-  Terminal,
-  Cpu,
-  RefreshCw,
-} from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
 import { RiskGauge } from '../ui/RiskGauge';
 import { Badge } from '../ui/Badge';
+import { Icon } from '../ui/Icon';
 
 export const TransactionScannerView: React.FC = () => {
   const currentScanInput = useSentinelStore((state) => state.currentScanInput);
@@ -70,7 +57,7 @@ export const TransactionScannerView: React.FC = () => {
                 placeholder="Paste contract address (0x...) or domain"
                 className="w-full px-4 py-3.5 rounded-xl bg-[#080808] border border-[#1E1E1E] focus:border-primary focus:outline-none text-white text-sm font-mono placeholder:text-white/30"
               />
-              <Terminal className="absolute right-4 top-4 w-4 h-4 text-accent" />
+              <Icon name="terminal" color="%23A1A1AA" className="absolute right-4 top-4 w-4 h-4" />
             </div>
 
             <motion.button
@@ -82,12 +69,12 @@ export const TransactionScannerView: React.FC = () => {
             >
               {isScanning ? (
                 <>
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <Icon name="refresh-cw" className="w-5 h-5 animate-spin" />
                   <span>Analyzing...</span>
                 </>
               ) : (
                 <>
-                  <Scan className="w-5 h-5" />
+                  <Icon name="scan" className="w-5 h-5" />
                   <span>Execute AI Scan</span>
                 </>
               )}
@@ -139,7 +126,7 @@ export const TransactionScannerView: React.FC = () => {
           <div className="flex flex-col items-center justify-center text-center space-y-6 py-8">
             <div className="relative">
               <div className="w-20 h-20 rounded-2xl bg-primary/20 border border-primary/50 flex items-center justify-center text-primary shadow-red-glow">
-                <Cpu className="w-10 h-10 animate-pulse" />
+                <Icon name="cpu" color="%23FF3B30" className="w-10 h-10 animate-pulse" />
               </div>
               <div className="absolute inset-0 rounded-2xl border-2 border-primary animate-ping opacity-30" />
             </div>
@@ -199,7 +186,7 @@ export const TransactionScannerView: React.FC = () => {
             {/* Checklist Matrix */}
             <GlowCard className="p-6">
               <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" /> Automated AI Vector Matrix
+                <Icon name="zap" color="%23FF3B30" className="w-4 h-4" /> Automated AI Vector Matrix
               </h3>
 
               <div className="space-y-3">
@@ -207,9 +194,9 @@ export const TransactionScannerView: React.FC = () => {
                   <div key={check.id} className="p-3 rounded-xl bg-[#161616] border border-[#1E1E1E] space-y-1">
                     <div className="flex items-center justify-between text-xs font-bold">
                       <span className="text-white flex items-center gap-2">
-                        {check.status === 'passed' && <CheckCircle2 className="w-4 h-4 text-success shrink-0" />}
-                        {check.status === 'failed' && <XCircle className="w-4 h-4 text-primary shrink-0" />}
-                        {check.status === 'warning' && <AlertTriangle className="w-4 h-4 text-warning shrink-0" />}
+                        {check.status === 'passed' && <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4 shrink-0" />}
+                        {check.status === 'failed' && <Icon name="x-circle" color="%23FF3B30" className="w-4 h-4 shrink-0" />}
+                        {check.status === 'warning' && <Icon name="alert-triangle" color="%23FACC15" className="w-4 h-4 shrink-0" />}
                         {check.label}
                       </span>
                       <span
@@ -237,7 +224,7 @@ export const TransactionScannerView: React.FC = () => {
               <div className="flex items-center justify-between pb-4 border-b border-[#1E1E1E]">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-xl bg-primary/20 border border-primary/40 text-primary">
-                    <Cpu className="w-5 h-5 animate-pulse" />
+                    <Icon name="cpu" color="%23FF3B30" className="w-5 h-5 animate-pulse" />
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-white">AI Plain English Explanation</h3>
@@ -259,12 +246,14 @@ export const TransactionScannerView: React.FC = () => {
                   >
                     <div className="flex items-center gap-3">
                       <span className="p-1.5 rounded-lg bg-primary/20 text-primary">
-                        <Info className="w-4 h-4" />
+                        <Icon name="info" color="%23FF3B30" className="w-4 h-4" />
                       </span>
                       <span className="text-sm font-bold text-white">1. What We Found</span>
                     </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-accent transition-transform ${
+                    <Icon
+                      name="chevron-down"
+                      color="%23A1A1AA"
+                      className={`w-4 h-4 transition-transform ${
                         activeAccordion === 'what' ? 'rotate-180' : ''
                       }`}
                     />
@@ -291,12 +280,14 @@ export const TransactionScannerView: React.FC = () => {
                   >
                     <div className="flex items-center gap-3">
                       <span className="p-1.5 rounded-lg bg-warning/20 text-warning">
-                        <AlertTriangle className="w-4 h-4" />
+                        <Icon name="alert-triangle" color="%23FACC15" className="w-4 h-4" />
                       </span>
                       <span className="text-sm font-bold text-white">2. Why It Matters</span>
                     </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-accent transition-transform ${
+                    <Icon
+                      name="chevron-down"
+                      color="%23A1A1AA"
+                      className={`w-4 h-4 transition-transform ${
                         activeAccordion === 'why' ? 'rotate-180' : ''
                       }`}
                     />
@@ -323,12 +314,14 @@ export const TransactionScannerView: React.FC = () => {
                   >
                     <div className="flex items-center gap-3">
                       <span className="p-1.5 rounded-lg bg-primary/20 text-primary">
-                        <ShieldAlert className="w-4 h-4" />
+                        <Icon name="shield-alert" color="%23FF3B30" className="w-4 h-4" />
                       </span>
                       <span className="text-sm font-bold text-white">3. Potential Financial Impact</span>
                     </div>
-                    <ChevronDown
-                      className={`w-4 h-4 text-accent transition-transform ${
+                    <Icon
+                      name="chevron-down"
+                      color="%23A1A1AA"
+                      className={`w-4 h-4 transition-transform ${
                         activeAccordion === 'impact' ? 'rotate-180' : ''
                       }`}
                     />
@@ -352,7 +345,7 @@ export const TransactionScannerView: React.FC = () => {
                   <div className="p-4 flex items-center justify-between text-left">
                     <div className="flex items-center gap-3">
                       <span className="p-1.5 rounded-lg bg-primary text-white shadow-red-glow">
-                        <ShieldCheck className="w-4 h-4" />
+                        <Icon name="shield-check" className="w-4 h-4" />
                       </span>
                       <div>
                         <span className="text-sm font-extrabold text-white">4. Recommended Action</span>

@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Scan, Sparkles, Lock, ArrowRight, Activity, Cpu, CheckCircle2, Zap, Wallet } from 'lucide-react';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 import { AnimatedText } from '../ui/AnimatedText';
 import { TextShimmer } from '../ui/TextShimmer';
+import { Icon } from '../ui/Icon';
 
 export const LandingHero: React.FC = () => {
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
@@ -15,13 +15,13 @@ export const LandingHero: React.FC = () => {
   const isConnecting = useSentinelStore((state) => state.isConnecting);
 
   const partners = [
-    { name: 'OpenAI', role: 'LLM Threat Reasoning', icon: '🤖' },
-    { name: 'OKX', role: 'Web3 L2 Ecosystem', icon: '⚡' },
-    { name: 'X Layer', role: 'Native L2 Security', icon: '⛓️' },
-    { name: 'LangGraph', role: 'Multi-Agent Workflows', icon: '🕸️' },
-    { name: 'CrewAI', role: 'Autonomous Auditing', icon: '👥' },
-    { name: 'Supabase', role: 'Realtime Telemetry', icon: '⚡' },
-    { name: 'PostgreSQL', role: 'Threat Vector DB', icon: '🐘' },
+    { name: 'OpenAI', role: 'LLM Threat Reasoning', iconName: 'openai', iconSet: 'brands' as const },
+    { name: 'OKX', role: 'Web3 L2 Ecosystem', iconName: 'okx', iconSet: 'brands' as const },
+    { name: 'OKX X Layer', role: 'Native L2 Security', iconName: 'xlayer', iconSet: 'brands' as const },
+    { name: 'LangGraph', role: 'Multi-Agent Workflows', iconName: 'langchain', iconSet: 'brands' as const },
+    { name: 'CrewAI', role: 'Autonomous Auditing', iconName: 'crewai', iconSet: 'brands' as const },
+    { name: 'Supabase', role: 'Realtime Telemetry', iconName: 'supabase', iconSet: 'brands' as const },
+    { name: 'PostgreSQL', role: 'Threat Vector DB', iconName: 'postgresql', iconSet: 'brands' as const },
   ];
 
   return (
@@ -35,7 +35,7 @@ export const LandingHero: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-md"
         >
-          <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+          <Icon name="sparkles" color="%23FF3B30" className="w-3.5 h-3.5 animate-pulse" />
           <TextShimmer className="text-[11px] sm:text-xs font-bold tracking-wide uppercase" duration={2.5}>
             REAL-TIME AI PRE-SIGN PROTECTION
           </TextShimmer>
@@ -75,33 +75,23 @@ export const LandingHero: React.FC = () => {
           className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto pt-2"
         >
           {isConnected ? (
-            <>
-              <button
-                onClick={() => setActiveTab('scanner')}
-                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
-              >
-                <Scan className="w-4 h-4" />
-                <span>Launch AI Scanner</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('dashboard')}
-                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-[#111111] border border-[#1E1E1E] hover:border-white/20 text-white font-semibold text-sm hover:bg-[#161616] transition-all cursor-pointer"
-              >
-                <Activity className="w-4 h-4 text-accent" />
-                <span>View Dashboard</span>
-              </button>
-            </>
+            <button
+              onClick={() => setActiveTab('scanner')}
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 transition-all cursor-pointer"
+            >
+              <Icon name="scan" className="w-4 h-4" />
+              <span>Launch AI Scanner</span>
+              <Icon name="arrow-right" className="w-4 h-4" />
+            </button>
           ) : (
             <button
               onClick={() => connectWallet()}
               disabled={isConnecting}
               className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-3.5 rounded-xl bg-gradient-to-r from-primary to-red-600 text-white font-bold text-sm tracking-wide shadow-red-glow hover:shadow-red-glow-lg hover:scale-105 disabled:opacity-60 disabled:hover:scale-100 transition-all cursor-pointer"
             >
-              <Wallet className="w-4 h-4" />
+              <Icon name="wallet" className="w-4 h-4" />
               <span>{isConnecting ? 'Connecting...' : 'Connect Wallet to Start'}</span>
-              <ArrowRight className="w-4 h-4" />
+              <Icon name="arrow-right" className="w-4 h-4" />
             </button>
           )}
         </motion.div>
@@ -168,14 +158,14 @@ export const LandingHero: React.FC = () => {
             <div className="p-3.5 sm:p-4 rounded-xl bg-[#080808] border border-[#1E1E1E] space-y-2.5">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-accent flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-primary" /> Target Contract
+                  <Icon name="cpu" color="%23FF3B30" className="w-3.5 h-3.5" /> Target Contract
                 </span>
                 <span className="font-mono text-white/90 text-[11px]">0x9522...BAfe5</span>
               </div>
 
               <div className="flex items-center justify-between text-xs">
                 <span className="text-accent flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-warning" /> Risk Rating
+                  <Icon name="lock" color="%23FACC15" className="w-3.5 h-3.5" /> Risk Rating
                 </span>
                 <span className="px-2 py-0.5 rounded font-bold text-primary bg-primary/10 border border-primary/30 text-[11px]">
                   96% CRITICAL
@@ -183,7 +173,7 @@ export const LandingHero: React.FC = () => {
               </div>
 
               <div className="p-2.5 rounded-lg bg-primary/10 border border-primary/20 text-xs text-primary font-medium flex items-center gap-2">
-                <Zap className="w-4 h-4 shrink-0" />
+                <Icon name="zap" color="%23FF3B30" className="w-4 h-4 shrink-0" />
                 <span className="leading-tight">Malicious Permit2 Drainer signature intercepted!</span>
               </div>
             </div>
@@ -191,14 +181,14 @@ export const LandingHero: React.FC = () => {
             {/* Live AI Status Matrix */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               <div className="p-2.5 sm:p-3 rounded-xl bg-[#161616] border border-[#1E1E1E] flex items-center gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                <Icon name="check-circle-2" color="%2322C55E" className="w-4 h-4 shrink-0" />
                 <div>
                   <p className="text-[10px] text-accent">Honeypot Engine</p>
                   <p className="text-xs font-bold text-white">Verified Safe</p>
                 </div>
               </div>
               <div className="p-2.5 sm:p-3 rounded-xl bg-[#161616] border border-[#1E1E1E] flex items-center gap-2.5">
-                <Activity className="w-4 h-4 text-primary shrink-0" />
+                <Icon name="activity" color="%23FF3B30" className="w-4 h-4 shrink-0" />
                 <div>
                   <p className="text-[10px] text-accent">Approval Guard</p>
                   <p className="text-xs font-bold text-primary">Revoke Advised</p>
@@ -224,7 +214,14 @@ export const LandingHero: React.FC = () => {
               transition={{ delay: 0.05 * idx }}
               className="p-3 rounded-xl bg-[#111111] border border-[#1E1E1E] flex flex-col items-center justify-center text-center hover:border-primary/40 hover:bg-[#161616] transition-all"
             >
-              <span className="text-lg mb-1">{p.icon}</span>
+              <div className="mb-2 flex h-12 w-12 items-center justify-center">
+                <Icon
+                  name={p.iconName}
+                  set={p.iconSet}
+                  alt={`${p.name} logo`}
+                  className="h-10 w-auto"
+                />
+              </div>
               <span className="text-xs font-bold text-white">{p.name}</span>
               <span className="text-[10px] text-accent mt-0.5">{p.role}</span>
             </motion.div>

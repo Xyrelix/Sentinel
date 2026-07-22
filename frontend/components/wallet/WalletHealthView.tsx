@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Wallet, ShieldCheck, AlertTriangle, TrendingUp, PieChart as PieIcon, ArrowUpRight, Flag } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { GlowCard } from '../ui/GlowCard';
 import { Badge } from '../ui/Badge';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
+import { Icon } from '../ui/Icon';
+import { AlertTriangle, Flag, TrendingUp, PieChart as PieChartIcon } from 'lucide-react';
+import { AreaChart, Area, Pie, PieChart as RechartsPieChart, Cell, Tooltip, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 export const WalletHealthView: React.FC = () => {
   const wallet = useSentinelStore((state) => state.wallet);
@@ -62,8 +62,8 @@ export const WalletHealthView: React.FC = () => {
           onClick={() => setActiveTab('approvals')}
           className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#111111] border border-primary/40 hover:border-primary text-white font-bold text-xs hover:bg-primary/10 transition-all"
         >
-          <span>Manage {approvals.length} Approvals</span>
-          <ArrowUpRight className="w-4 h-4 text-primary" />
+          <span>Scan a Contract</span>
+          <Icon name="arrow-up-right" color="%23FF3B30" className="w-4 h-4" />
         </button>
       </div>
 
@@ -76,10 +76,23 @@ export const WalletHealthView: React.FC = () => {
               <h3 className={`text-3xl font-black mt-1 ${safetyScore >= 70 ? 'text-success' : safetyScore >= 40 ? 'text-warning' : 'text-primary'}`}>
                 {safetyScore} / 100
               </h3>
-              <p className="text-xs text-accent mt-1">Derived from real on-chain approval checks</p>
+              <p className="text-xs text-accent mt-1">Gas token on {wallet.network || 'X Layer'}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white">
+              <Icon name="wallet" className="w-5 h-5" />
+            </div>
+          </div>
+        </GlowCard>
+
+        <GlowCard>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-xs text-accent uppercase font-medium">Network</p>
+              <h3 className="text-lg font-black text-success mt-1">{wallet.network || 'Not detected'}</h3>
+              <p className="text-xs text-accent mt-1">Connected chain</p>
             </div>
             <div className="p-3 rounded-xl bg-success/10 border border-success/30 text-success">
-              <ShieldCheck className="w-5 h-5" />
+              <Icon name="shield-check" color="%2322C55E" className="w-5 h-5" />
             </div>
           </div>
         </GlowCard>
@@ -94,7 +107,7 @@ export const WalletHealthView: React.FC = () => {
               <p className="text-xs text-accent mt-1">{wallet.balanceEth.toFixed(4)} OKB at live market price</p>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-white">
-              <Wallet className="w-5 h-5" />
+              <Icon name="cpu" className="w-5 h-5" />
             </div>
           </div>
         </GlowCard>
@@ -143,6 +156,21 @@ export const WalletHealthView: React.FC = () => {
           </ul>
         </GlowCard>
       )}
+
+      {/* Note on scope */}
+      <GlowCard className="p-6">
+        <div className="flex items-start gap-3">
+          <Icon name="shield-check" color="%23FF3B30" className="w-5 h-5 shrink-0 mt-0.5" />
+          <div>
+            <h3 className="text-sm font-bold text-white">Token approvals &amp; portfolio history</h3>
+            <p className="text-xs text-accent mt-1 leading-relaxed">
+              Full token-approval lists and historical risk trends require an on-chain indexer,
+              which is not connected in this build. Use the AI Scanner to inspect any specific
+              contract address against live on-chain code.
+            </p>
+          </div>
+        </div>
+      </GlowCard>
 
       {/* Charts Grid Section — illustrative only: historical risk trends and a
           full multi-token portfolio breakdown both require an on-chain indexer,
@@ -203,14 +231,14 @@ export const WalletHealthView: React.FC = () => {
           <GlowCard className="p-6">
             <div className="flex items-center justify-between pb-4 border-b border-[#1E1E1E]">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <PieIcon className="w-4 h-4 text-accent" /> Token Allocation & Exposure
+                <PieChartIcon className="w-4 h-4 text-accent" /> Token Allocation & Exposure
               </h3>
               <span className="text-xs text-accent">OKX X Layer</span>
             </div>
 
             <div className="h-48 mt-4 flex items-center justify-center">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <RechartsPieChart>
                   <Pie
                     data={tokenHoldings}
                     cx="50%"
@@ -233,7 +261,7 @@ export const WalletHealthView: React.FC = () => {
                       color: '#ffffff',
                     }}
                   />
-                </PieChart>
+                </RechartsPieChart>
               </ResponsiveContainer>
             </div>
 

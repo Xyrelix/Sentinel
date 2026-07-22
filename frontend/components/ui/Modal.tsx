@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { Icon } from './Icon';
 
 interface ModalProps {
   isOpen: boolean;
@@ -59,7 +59,7 @@ export const Modal: React.FC<ModalProps> = ({
                 onClick={onClose}
                 className="p-1 rounded-lg text-accent hover:text-white hover:bg-white/10 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <Icon name="x" className="w-5 h-5" />
               </button>
             </div>
 

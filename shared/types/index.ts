@@ -24,13 +24,19 @@ export interface ContractInspectionResult {
   simulationSucceeded: boolean;
   revertReason?: string;
   flags: ContractFlag[];
+  // Specific human-readable findings from external threat-intel sources
+  // (e.g. GoPlus) — richer than the generic per-flag reason text, since a
+  // single flag can have several distinct underlying findings.
+  externalFindings?: string[];
 }
 
 export type ContractFlag =
   | "not-a-contract"
   | "empty-bytecode"
   | "simulation-reverted"
-  | "unlimited-approval-requested";
+  | "unlimited-approval-requested"
+  | "goplus-malicious-address"
+  | "goplus-honeypot-token";
 
 export interface ThreatAlert {
   id: string;
