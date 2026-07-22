@@ -16,6 +16,7 @@ import {
 import type { ContractFlag, ContractInspectionResult } from "@shared/types";
 import { isUnlimitedAmount } from "../lib/utils";
 import { checkAddressSecurity, checkTokenSecurity } from "../lib/goplus";
+import { checkChainabuseAddress } from "../lib/chainabuse";
 
 // Minimum bytecode size (in bytes) below which we treat a "contract" as
 // suspicious — most real ERC20/ERC721 contracts are well over this.
@@ -104,6 +105,19 @@ export async function inspectContract(
     } catch {
       // best-effort — ignore
     }
+  }
+
+  // 5. Chainabuse community-reported scam database — a second, independent
+  // address-reputation source alongside GoPlus. No-ops (never throws) when
+  // CHAINABUSE_API_KEY isn't configured, so this is purely additive.
+  try {
+    const chainabuseCheck = await checkChainabuseAddress(tx.to);
+    if (chainabuseCheck.isReported) {
+      flags.push("chainabuse-reported-address");
+      externalFindings.push(...chainabuseCheck.reasons);
+    }
+  } catch {
+    // best-effort — ignore
   }
 
   return {

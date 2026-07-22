@@ -36,7 +36,8 @@ export type ContractFlag =
   | "simulation-reverted"
   | "unlimited-approval-requested"
   | "goplus-malicious-address"
-  | "goplus-honeypot-token";
+  | "goplus-honeypot-token"
+  | "chainabuse-reported-address";
 
 export interface ThreatAlert {
   id: string;

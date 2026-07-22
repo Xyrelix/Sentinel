@@ -21,6 +21,7 @@ const FLAG_WEIGHTS: Record<ContractFlag, number> = {
   "unlimited-approval-requested": 70,
   "goplus-malicious-address": 85,
   "goplus-honeypot-token": 80,
+  "chainabuse-reported-address": 80,
 };
 
 // Human-readable explanation shown to the user for each flag. Where a flag
@@ -40,6 +41,8 @@ const FLAG_REASONS: Record<ContractFlag, string> = {
     "This address matches known malicious activity in GoPlus Security's real-world threat intelligence database.",
   "goplus-honeypot-token":
     "GoPlus Security's live token analysis flagged this contract with honeypot or scam-tax characteristics.",
+  "chainabuse-reported-address":
+    "This address has been reported to Chainabuse's community-sourced scam database.",
 };
 
 function scoreToLabel(score: number): RiskScore["label"] {

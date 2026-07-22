@@ -1,4 +1,5 @@
 import { Eip1193Provider } from '../types/ethereum';
+import PhishingDetector from 'eth-phishing-detect/src/detector';
 
 export const X_LAYER_CHAIN_ID = 196;
 
@@ -333,6 +334,46 @@ export async function checkPhishingSiteClient(domain: string): Promise<{ isPhish
   };
 }
 
+// MetaMask's eth-phishing-detect — a second, independent phishing-domain
+// source. Fetches the live, continuously-updated list from GitHub (the
+// bundled npm config.json is a static install-time snapshot that goes
+// stale) — falls back to that bundled snapshot only if the live fetch fails.
+const ETH_PHISHING_LIVE_CONFIG_URL =
+  'https://raw.githubusercontent.com/MetaMask/eth-phishing-detect/main/src/config.json';
+let ethPhishingDetectorPromise: Promise<PhishingDetector> | null = null;
+
+async function getEthPhishingDetector(): Promise<PhishingDetector> {
+  if (!ethPhishingDetectorPromise) {
+    ethPhishingDetectorPromise = (async () => {
+      try {
+        const res = await fetch(ETH_PHISHING_LIVE_CONFIG_URL);
+        if (!res.ok) throw new Error(`status ${res.status}`);
+        const config = await res.json();
+        return new PhishingDetector(config);
+      } catch {
+        // Dynamic import — code-split so this ~370KB fallback snapshot is
+        // only ever downloaded on the rare path where the live fetch fails,
+        // not bundled into every page load.
+        const fallbackModule = await import('eth-phishing-detect/src/config.json');
+        return new PhishingDetector((fallbackModule as { default?: unknown }).default ?? fallbackModule);
+      }
+    })();
+  }
+  return ethPhishingDetectorPromise;
+}
+
+/** Checks a domain against MetaMask's eth-phishing-detect blocklist — no wallet or RPC needed. */
+export async function checkEthPhishingListClient(
+  domain: string
+): Promise<{ isPhishing: boolean; reason?: string }> {
+  const detector = await getEthPhishingDetector();
+  const { result, type } = detector.check(domain);
+  return {
+    isPhishing: result,
+    reason: result ? `MetaMask eth-phishing-detect: flagged (${type} match).` : undefined,
+  };
+}
+
 // ---------------------------------------------------------------------------
 // On-chain scan
 // ---------------------------------------------------------------------------
@@ -441,9 +482,36 @@ export interface DomainScanFinding {
   reasons: string[];
 }
 
-/** Checks a domain against GoPlus's phishing-site database. No wallet or RPC needed — works even when disconnected. */
+/**
+ * Checks a domain against two independent phishing-domain sources — GoPlus
+ * and MetaMask's eth-phishing-detect. No wallet or RPC needed — works even
+ * when disconnected. Each source is best-effort — one being down doesn't
+ * block the other from still catching a match.
+ */
 export async function scanDomain(domain: string): Promise<DomainScanFinding> {
-  const { isPhishing, reasons } = await checkPhishingSiteClient(domain);
+  const reasons: string[] = [];
+  let isPhishing = false;
+
+  try {
+    const goPlusResult = await checkPhishingSiteClient(domain);
+    if (goPlusResult.isPhishing) {
+      isPhishing = true;
+      reasons.push(...goPlusResult.reasons);
+    }
+  } catch {
+    // best-effort — ignore
+  }
+
+  try {
+    const metaMaskResult = await checkEthPhishingListClient(domain);
+    if (metaMaskResult.isPhishing) {
+      isPhishing = true;
+      if (metaMaskResult.reason) reasons.push(metaMaskResult.reason);
+    }
+  } catch {
+    // best-effort — ignore
+  }
+
   if (isPhishing) {
     return { score: 95, label: 'high-risk', isPhishing, reasons };
   }
@@ -451,6 +519,6 @@ export async function scanDomain(domain: string): Promise<DomainScanFinding> {
     score: 0,
     label: 'safe',
     isPhishing,
-    reasons: ["No known phishing reports for this domain in GoPlus Security's database."],
+    reasons: ["No known phishing reports for this domain in GoPlus Security or MetaMask's eth-phishing-detect list."],
   };
 }
