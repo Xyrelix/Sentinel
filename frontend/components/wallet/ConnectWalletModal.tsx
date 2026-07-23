@@ -1,16 +1,18 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Modal } from '../ui/Modal';
 import { useSentinelStore } from '../../store/useSentinelStore';
 import { Shield, CheckCircle2, ExternalLink } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getAvailableWallets, KNOWN_WALLETS, X_LAYER_CHAIN_ID } from '../../lib/web3';
 
-const WALLET_ICONS: Record<string, string> = {
-  'com.okex.wallet': '⚡',
-  'io.metamask': '🦊',
-  'com.coinbase.wallet': '🔵',
+/** Maps a known wallet rdns → local public SVG path */
+const WALLET_ICON_SRC: Record<string, string> = {
+  'com.okex.wallet': '/brands/okx.svg',
+  'io.metamask': '/brands/metamask.svg',
+  'com.coinbase.wallet': '/brands/coinbase.svg',
 };
 
 const WALLET_DESCRIPTIONS: Record<string, string> = {
@@ -18,6 +20,23 @@ const WALLET_DESCRIPTIONS: Record<string, string> = {
   'io.metamask': 'Connect using Browser Extension',
   'com.coinbase.wallet': 'Self-custody mobile & desktop',
 };
+
+/** Renders a wallet icon — local SVG for known wallets, EIP-6963 data URI for
+ *  discovered extras, and a generic card icon as the final fallback. */
+function WalletIcon({ src, name }: { src: string; name: string }) {
+  return (
+    <div className="w-9 h-9 rounded-xl overflow-hidden flex items-center justify-center bg-white/5 shrink-0">
+      <Image
+        src={src}
+        alt={`${name} icon`}
+        width={36}
+        height={36}
+        className="object-contain w-full h-full"
+        unoptimized
+      />
+    </div>
+  );
+}
 
 export const ConnectWalletModal: React.FC = () => {
   const isOpen = useSentinelStore((state) => state.isConnectModalOpen);
@@ -34,7 +53,7 @@ export const ConnectWalletModal: React.FC = () => {
     return {
       id: match?.id ?? known.id,
       name: known.name,
-      icon: WALLET_ICONS[known.id] ?? '🔗',
+      iconSrc: WALLET_ICON_SRC[known.id] ?? '/brands/genericwallet.svg',
       desc: WALLET_DESCRIPTIONS[known.id] ?? 'Connect using Browser Extension',
       installUrl: known.installUrl,
       isInstalled: Boolean(match),
@@ -47,7 +66,8 @@ export const ConnectWalletModal: React.FC = () => {
     .map((w) => ({
       id: w.id,
       name: w.name,
-      icon: '🔗',
+      // Use the EIP-6963 icon data URI if available, else generic fallback
+      iconSrc: w.icon ?? '/brands/genericwallet.svg',
       desc: 'Detected in this browser',
       installUrl: undefined as string | undefined,
       isInstalled: true,
@@ -80,7 +100,7 @@ export const ConnectWalletModal: React.FC = () => {
               className="flex items-center justify-between p-3.5 rounded-xl bg-[#161616] border border-[#1E1E1E] hover:border-primary/50 hover:bg-[#1A1A1A] transition-all text-left group"
             >
               <div className="flex items-center gap-3">
-                <span className="text-2xl">{w.icon}</span>
+                <WalletIcon src={w.iconSrc} name={w.name} />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-white group-hover:text-primary transition-colors">

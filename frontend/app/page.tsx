@@ -23,8 +23,6 @@ export default function Home() {
     }
 
     switch (activeTab) {
-      case 'landing':
-        return <LandingHero />;
       case 'dashboard':
         return <DashboardView />;
       case 'scanner':
@@ -40,7 +38,7 @@ export default function Home() {
       case 'settings':
         return <SettingsView />;
       default:
-        return <LandingHero />;
+        return <DashboardView />;
     }
   };
 

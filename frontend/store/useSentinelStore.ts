@@ -320,6 +320,7 @@ export const useSentinelStore = create<SentinelStore>()(
         },
         isConnectModalOpen: false,
         isConnecting: false,
+        activeTab: 'dashboard',
       });
       get().addToast({
         type: result.chainId === X_LAYER_CHAIN_ID ? 'success' : 'warning',
