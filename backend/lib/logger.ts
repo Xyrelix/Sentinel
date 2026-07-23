@@ -41,11 +41,11 @@ export const logger = {
  * Wraps an API route handler with request/response/error/timing logging.
  * Usage: export const POST = withLogging('revoke', async (request) => {...});
  */
-export function withLogging<T extends (request: Request) => Promise<Response>>(
+export function withLogging<Req extends Request, Res extends Response>(
   route: string,
-  handler: T
-): T {
-  return (async (request: Request) => {
+  handler: (request: Req) => Promise<Res>
+): (request: Req) => Promise<Res> {
+  return (async (request: Req) => {
     const start = Date.now();
     const method = request.method;
     logger.info("request.start", { route, method, url: request.url });
@@ -69,5 +69,5 @@ export function withLogging<T extends (request: Request) => Promise<Response>>(
       });
       throw err;
     }
-  }) as T;
+  });
 }
