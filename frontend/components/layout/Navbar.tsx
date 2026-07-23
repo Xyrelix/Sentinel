@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Icon } from '@/components/ui/Icon';
 import { MenuToggleIcon } from '@/components/ui/menu-toggle-icon';
@@ -22,7 +23,6 @@ export function Navbar() {
 
   const links: { id: NavTab; label: string }[] = wallet.isConnected
     ? [
-        { id: 'landing', label: 'Overview' },
         { id: 'dashboard', label: 'Dashboard' },
         { id: 'scanner', label: 'AI Scanner' },
         { id: 'wallet', label: 'Wallet Health' },
@@ -83,17 +83,21 @@ export function Navbar() {
       >
         {/* Brand Logo */}
         <button
-          onClick={() => handleNavClick('landing')}
+          onClick={() => handleNavClick(wallet.isConnected ? 'dashboard' : 'landing')}
           className="flex items-center gap-2.5 group focus:outline-none"
         >
           <div className="relative flex items-center justify-center w-8 h-8 rounded-xl bg-black/40 border border-primary/30 shadow-red-glow group-hover:scale-105 transition-transform overflow-hidden">
             <img src="/logo.png" alt="Sentinel Logo" className="w-6 h-6 object-contain" />
           </div>
-          <div className="flex flex-col text-left">
-            <span className="text-sm font-heading font-black tracking-wider text-white group-hover:text-primary transition-colors flex items-center gap-1.5 leading-none">
-              SENTINEL <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-primary/20 text-primary border border-primary/30 uppercase">AI</span>
-            </span>
-          </div>
+          <Image
+            src="/Sentinel4.png"
+            alt="SENTINEL"
+            width={86}
+            height={14}
+            className="h-3.5 w-auto object-contain"
+            unoptimized
+            priority
+          />
         </button>
 
         {/* Center Links */}
