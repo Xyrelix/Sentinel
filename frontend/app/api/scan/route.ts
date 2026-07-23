@@ -40,7 +40,7 @@ const scanHandler = async (request: NextRequest): Promise<NextResponse> => {
 
     const result = await scanTransaction(
       {
-        from: body.from ?? '0x0000000000000000000000000000000000dEaD',
+        from: body.from ?? '0x000000000000000000000000000000000000dEaD',
         to: target,
         data: body.data ?? '0x',
         value: body.value ? BigInt(body.value) : 0n,
