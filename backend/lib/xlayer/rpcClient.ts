@@ -98,3 +98,45 @@ export async function getTokenAllowance(
     args: [owner, spender],
   });
 }
+
+// Minimal ERC20 ABI fragments for the "Unlimited Approval Exposure" USD
+// calculation - the actual amount currently drainable is the wallet's real
+// token balance, not the (often effectively-infinite) approved amount.
+const ERC20_BALANCE_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+
+const ERC20_DECIMALS_ABI = [
+  {
+    name: "decimals",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+] as const;
+
+export async function getTokenBalance(tokenAddress: Address, owner: Address): Promise<bigint> {
+  const c = getXLayerClient();
+  return c.readContract({
+    address: tokenAddress,
+    abi: ERC20_BALANCE_ABI,
+    functionName: "balanceOf",
+    args: [owner],
+  });
+}
+
+export async function getTokenDecimals(tokenAddress: Address): Promise<number> {
+  const c = getXLayerClient();
+  return c.readContract({
+    address: tokenAddress,
+    abi: ERC20_DECIMALS_ABI,
+    functionName: "decimals",
+  });
+}

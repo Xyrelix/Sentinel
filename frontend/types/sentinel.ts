@@ -84,4 +84,10 @@ export interface WalletState {
   balanceUsd: number;
   overallRiskScore: number;
   isVerified?: boolean; // true once the nonce-signature ownership check has succeeded
+  // Real, backend-computed metrics from /api/wallet-health - see
+  // backend/api/walletHealth.ts for the formulas. Default to neutral values
+  // until the first fetchApprovals() call resolves.
+  contractSafetyScore: number;
+  unlimitedApprovalExposureUsd: number;
+  phishingTargetScore: number;
 }

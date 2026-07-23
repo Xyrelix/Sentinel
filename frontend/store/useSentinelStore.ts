@@ -32,6 +32,9 @@ const EMPTY_WALLET: WalletState = {
   balanceUsd: 0,
   overallRiskScore: 0,
   isVerified: false,
+  contractSafetyScore: 100,
+  unlimitedApprovalExposureUsd: 0,
+  phishingTargetScore: 0,
 };
 
 const MAX_UINT256_STR = (2n ** 256n - 1n).toString();
@@ -275,7 +278,7 @@ function mapTokenApprovalToItem(a: TokenApproval, index: number): ApprovalItem {
     spenderAddress: a.spender,
     spenderName: a.label ?? shortenAddress(a.spender),
     riskLevel: unlimited ? 'CRITICAL' : 'LOW',
-    valueAtRiskUsd: 0,
+    valueAtRiskUsd: a.valueUsd ?? 0,
     protocol: a.label ?? 'Watched Spender',
     lastUpdated: 'Just now',
   };
@@ -374,6 +377,9 @@ export const useSentinelStore = create<SentinelStore>()(
           balanceUsd: 0,
           overallRiskScore: 0,
           isVerified: false,
+          contractSafetyScore: 100,
+          unlimitedApprovalExposureUsd: 0,
+          phishingTargetScore: 0,
         },
         isConnectModalOpen: false,
         isConnecting: false,
@@ -785,7 +791,13 @@ export const useSentinelStore = create<SentinelStore>()(
         approvals,
         approvalRiskFlags: riskFlags,
         approvalsLoading: false,
-        wallet: { ...state.wallet, overallRiskScore: computeOverallRiskScore(approvals, riskFlags) },
+        wallet: {
+          ...state.wallet,
+          overallRiskScore: computeOverallRiskScore(approvals, riskFlags),
+          contractSafetyScore: data.contractSafetyScore ?? 100,
+          unlimitedApprovalExposureUsd: data.unlimitedApprovalExposureUsd ?? 0,
+          phishingTargetScore: data.phishingTargetScore ?? 0,
+        },
       }));
     } catch (err) {
       set({
