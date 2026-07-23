@@ -92,9 +92,9 @@ export function Navbar() {
           <Image
             src="/Sentinel4.png"
             alt="SENTINEL"
-            width={120}
-            height={20}
-            className="h-5 w-auto object-contain"
+            width={86}
+            height={14}
+            className="h-3.5 w-auto object-contain"
             unoptimized
             priority
           />
