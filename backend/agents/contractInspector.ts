@@ -63,22 +63,39 @@ export async function inspectContract(
   const flags: ContractFlag[] = [];
   const externalFindings: string[] = [];
 
+  // A bare address/domain lookup (no real calldata or value) isn't an actual
+  // pending transaction - it's just "is this thing safe?". Both checks below
+  // that depend on an intended interaction (not-a-contract, simulation) only
+  // count as risk signals when there's a real payload to judge; otherwise
+  // they misfire constantly (every plain wallet is "not a contract", and
+  // probing a real contract's fallback with empty calldata/0 value reverts
+  // for most legitimate contracts - e.g. USDT has no payable fallback).
+  const hasRealPayload = Boolean(tx.data && tx.data !== "0x") || Boolean(tx.value && tx.value > 0n);
+
   let contractInfo = { isContract: false, bytecodeSize: 0 };
   let simulation: { success: boolean; revertReason?: string } = { success: true };
 
   if (isSupportedChain(chainId)) {
-    // 1. Bytecode check
+    // 1. Bytecode check - always run for informational value (isContract/
+    // bytecodeSize are returned either way), but "not-a-contract" is only a
+    // risk flag when a real interaction was actually attempted against it.
     contractInfo = await getContractInfoForChain(tx.to as Address, chainId);
     if (!contractInfo.isContract) {
-      flags.push("not-a-contract");
+      if (hasRealPayload) {
+        flags.push("not-a-contract");
+      }
     } else if (contractInfo.bytecodeSize < SUSPICIOUS_BYTECODE_THRESHOLD) {
       flags.push("empty-bytecode");
     }
 
     // 2. Simulation check - does the call revert before it's ever signed?
-    simulation = await simulateTransactionForChain(tx, chainId);
-    if (!simulation.success) {
-      flags.push("simulation-reverted");
+    // Only meaningful with a real payload; there's nothing to simulate for
+    // a bare lookup, and an empty-calldata probe reverting proves nothing.
+    if (hasRealPayload) {
+      simulation = await simulateTransactionForChain(tx, chainId);
+      if (!simulation.success) {
+        flags.push("simulation-reverted");
+      }
     }
   } else {
     externalFindings.push(
