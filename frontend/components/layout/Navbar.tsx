@@ -9,9 +9,11 @@ import { useScroll } from '@/components/ui/use-scroll';
 import { cn } from '@/lib/utils';
 import { useSentinelStore } from '@/store/useSentinelStore';
 import { NavTab } from '@/types/sentinel';
+import { DisconnectConfirmModal } from '../wallet/DisconnectConfirmModal';
 
 export function Navbar() {
   const [open, setOpen] = React.useState(false);
+  const [isDisconnectModalOpen, setDisconnectModalOpen] = React.useState(false);
   const scrolled = useScroll(10);
 
   const activeTab = useSentinelStore((state) => state.activeTab);
@@ -39,7 +41,7 @@ export function Navbar() {
 
   const handleWalletClick = () => {
     if (wallet.isConnected) {
-      disconnectWallet();
+      setDisconnectModalOpen(true);
     } else {
       setConnectModalOpen(true);
     }
@@ -194,6 +196,11 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      <DisconnectConfirmModal 
+        isOpen={isDisconnectModalOpen}
+        onClose={() => setDisconnectModalOpen(false)}
+      />
     </header>
   );
 }
