@@ -2,7 +2,7 @@
  * api/revoke.ts
  *
  * Constructs an unsigned "revoke approval" transaction for a given
- * token/spender pair — sets the ERC20 allowance back to 0.
+ * token/spender pair - sets the ERC20 allowance back to 0.
  *
  * IMPORTANT: this does NOT sign or broadcast anything. Backend never holds
  * user private keys. It returns the { to, data } needed for the frontend
@@ -30,7 +30,7 @@ export interface RevokeRequest {
 }
 
 export interface UnsignedRevokeTransaction {
-  to: Address; // the token contract — this is what gets called
+  to: Address; // the token contract - this is what gets called
   data: `0x${string}`; // encoded approve(spender, 0)
   value: "0x0"; // no native token sent
 }

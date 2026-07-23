@@ -9,6 +9,25 @@ import { RiskGauge } from '../ui/RiskGauge';
 import { Badge } from '../ui/Badge';
 import { AnimatedNumber } from '../ui/AnimatedNumber';
 
+function safetyColorClass(score: number): string {
+  if (score >= 80) return 'text-success';
+  if (score >= 50) return 'text-warning';
+  return 'text-primary';
+}
+
+function phishingScoreLabel(score: number): string {
+  if (score < 0.15) return 'Very Low';
+  if (score < 0.4) return 'Low';
+  if (score < 0.7) return 'Medium';
+  return 'High';
+}
+
+function phishingScoreColorClass(score: number): string {
+  if (score < 0.15) return 'text-success';
+  if (score < 0.4) return 'text-warning';
+  return 'text-primary';
+}
+
 export const DashboardView: React.FC = () => {
   const wallet = useSentinelStore((state) => state.wallet);
   const setActiveTab = useSentinelStore((state) => state.setActiveTab);
@@ -139,15 +158,21 @@ export const DashboardView: React.FC = () => {
             <div className="p-4 rounded-xl bg-[#161616] border border-[#1E1E1E] text-xs space-y-2">
               <div className="flex items-center justify-between text-accent">
                 <span>Contract Interaction Safety:</span>
-                <span className="text-success font-bold">98/100</span>
+                <span className={`font-bold ${safetyColorClass(wallet.contractSafetyScore)}`}>
+                  {wallet.contractSafetyScore}/100
+                </span>
               </div>
               <div className="flex items-center justify-between text-accent">
                 <span>Unlimited Approval Exposure:</span>
-                <span className="text-warning font-bold">$14,250 USD</span>
+                <span className={`font-bold ${wallet.unlimitedApprovalExposureUsd > 0 ? 'text-warning' : 'text-success'}`}>
+                  ${wallet.unlimitedApprovalExposureUsd.toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
+                </span>
               </div>
               <div className="flex items-center justify-between text-accent">
                 <span>Phishing Target Score:</span>
-                <span className="text-success font-bold font-mono">0.02 (Very Low)</span>
+                <span className={`font-bold font-mono ${phishingScoreColorClass(wallet.phishingTargetScore)}`}>
+                  {wallet.phishingTargetScore.toFixed(2)} ({phishingScoreLabel(wallet.phishingTargetScore)})
+                </span>
               </div>
             </div>
           </GlowCard>

@@ -44,7 +44,7 @@ export interface ApprovalItem {
   tokenSymbol: string;
   tokenName: string;
   tokenIcon?: string;
-  tokenAddress?: string; // present for real (backend-sourced) approvals — required to build a revoke tx
+  tokenAddress?: string; // present for real (backend-sourced) approvals - required to build a revoke tx
   allowance: string; // e.g. "Unlimited" or "10,000 USDT"
   isUnlimited: boolean;
   spenderAddress: string;
@@ -84,4 +84,10 @@ export interface WalletState {
   balanceUsd: number;
   overallRiskScore: number;
   isVerified?: boolean; // true once the nonce-signature ownership check has succeeded
+  // Real, backend-computed metrics from /api/wallet-health - see
+  // backend/api/walletHealth.ts for the formulas. Default to neutral values
+  // until the first fetchApprovals() call resolves.
+  contractSafetyScore: number;
+  unlimitedApprovalExposureUsd: number;
+  phishingTargetScore: number;
 }

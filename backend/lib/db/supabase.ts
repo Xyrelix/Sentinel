@@ -4,13 +4,13 @@
  * Supabase client + typed queries.
  *
  * Three tables in use:
- *   - watched_pairs — token/spender pairs to check wallet approvals
+ *   - watched_pairs - token/spender pairs to check wallet approvals
  *     against, used by api/walletHealth.ts (replaces the old hardcoded
  *     WATCHED_PAIRS array).
- *   - auth_nonces — single-use, expiring nonces for wallet-signature
+ *   - auth_nonces - single-use, expiring nonces for wallet-signature
  *     authentication, used by lib/okx/walletSdk.ts to prevent signature
  *     replay attacks.
- *   - threat_reports — community-submitted scam reports, used by
+ *   - threat_reports - community-submitted scam reports, used by
  *     api/threatIntel.ts.
  *
  * Requires SUPABASE_URL and SUPABASE_ANON_KEY in .env.local.
@@ -84,7 +84,7 @@ export async function getWatchedPairs(): Promise<WatchedPair[]> {
 
 /**
  * Adds a new token/spender pair to the watchlist. Used for the
- * "Community Intelligence" feature — flagging newly discovered risky
+ * "Community Intelligence" feature - flagging newly discovered risky
  * spenders without a redeploy.
  */
 export async function addWatchedPair(pair: WatchedPair): Promise<void> {
@@ -144,7 +144,7 @@ export async function createNonce(address: string): Promise<string> {
 /**
  * Validates a nonce: must exist, match the claimed address, be unused,
  * and not be expired. Marks it used atomically on success so it can never
- * be replayed — a signature captured once can't be reused for a second
+ * be replayed - a signature captured once can't be reused for a second
  * "session." Used by lib/okx/walletSdk.ts's verifyWalletSignature().
  */
 export async function consumeNonce(

@@ -1,6 +1,6 @@
 /**
  * scripts/test-revoke.ts
- * Manual smoke test — run with:
+ * Manual smoke test - run with:
  *   node --env-file=.env.local --import tsx scripts/test-revoke.ts
  */
 

@@ -10,16 +10,15 @@
  *   - X Layer Testnet: 195
  *
  * Requires X_LAYER_RPC_URL in .env.local (see .env.example).
+ *
+ * Scope note: bytecode/simulation checks for scanning now live in
+ * lib/rpc/multiChain.ts (multichain, X Layer included via its own registry
+ * entry). This file stays dedicated to the genuinely X-Layer-specific
+ * features - wallet-health/approvals and signature verification - that are
+ * conceptually tied to X Layer, not "whichever chain the user is scanning".
  */
 
-import {
-  createPublicClient,
-  http,
-  defineChain,
-  type Address,
-  type Hash,
-  type PublicClient,
-} from "viem";
+import { createPublicClient, http, defineChain, type Address, type PublicClient } from "viem";
 
 // ---------------------------------------------------------------------------
 // Chain definition
@@ -62,83 +61,6 @@ export function getXLayerClient(): PublicClient {
   return client;
 }
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-export interface TransactionRequestInput {
-  from: Address;
-  to: Address;
-  data?: `0x${string}`;
-  value?: bigint;
-}
-
-export interface ContractInfo {
-  address: Address;
-  isContract: boolean;
-  bytecodeSize: number;
-}
-
-export interface SimulationResult {
-  success: boolean;
-  gasEstimate?: bigint;
-  revertReason?: string;
-}
-
-// ---------------------------------------------------------------------------
-// Reads
-// ---------------------------------------------------------------------------
-
-/**
- * Fetches a submitted/mined transaction by hash — used when reviewing
- * transaction history for wallet health checks, not for pre-signature scans
- * (those come in as unsigned TransactionRequestInput, see below).
- */
-export async function getTransactionByHash(hash: Hash) {
-  const c = getXLayerClient();
-  return c.getTransaction({ hash });
-}
-
-/**
- * Determines whether an address is a contract (has bytecode) or an EOA.
- * First signal used by contractInspector.ts — interacting with an EOA
- * masquerading as a token, for example, is itself a red flag.
- */
-export async function getContractInfo(address: Address): Promise<ContractInfo> {
-  const c = getXLayerClient();
-  const bytecode = await c.getBytecode({ address });
-  return {
-    address,
-    isContract: Boolean(bytecode && bytecode !== "0x"),
-    bytecodeSize: bytecode ? (bytecode.length - 2) / 2 : 0, // hex string -> bytes
-  };
-}
-
-/**
- * Simulates a transaction via eth_call before it's signed, to check whether
- * it would revert and to get a gas estimate. This is the core of the
- * "pre-signature" scan — we never broadcast, only simulate.
- */
-export async function simulateTransaction(
-  tx: TransactionRequestInput
-): Promise<SimulationResult> {
-  const c = getXLayerClient();
-  try {
-    const gasEstimate = await c.estimateGas({
-      account: tx.from,
-      to: tx.to,
-      data: tx.data,
-      value: tx.value ?? 0n,
-    });
-    return { success: true, gasEstimate };
-  } catch (err) {
-    return {
-      success: false,
-      revertReason: err instanceof Error ? err.message : "Unknown revert",
-    };
-  }
-}
-
 /** Reads the native OKB balance for a given address. */
 export async function getNativeBalance(address: Address): Promise<bigint> {
   const c = getXLayerClient();
@@ -146,7 +68,7 @@ export async function getNativeBalance(address: Address): Promise<bigint> {
 }
 
 /**
- * Reads the ERC20 `allowance(owner, spender)` for a token — the core
+ * Reads the ERC20 `allowance(owner, spender)` for a token - the core
  * primitive behind wallet-health approval checks and the one-click revoke
  * feature. Uses the minimal ERC20 ABI fragment needed.
  */
@@ -174,5 +96,47 @@ export async function getTokenAllowance(
     abi: ERC20_ALLOWANCE_ABI,
     functionName: "allowance",
     args: [owner, spender],
+  });
+}
+
+// Minimal ERC20 ABI fragments for the "Unlimited Approval Exposure" USD
+// calculation - the actual amount currently drainable is the wallet's real
+// token balance, not the (often effectively-infinite) approved amount.
+const ERC20_BALANCE_ABI = [
+  {
+    name: "balanceOf",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+] as const;
+
+const ERC20_DECIMALS_ABI = [
+  {
+    name: "decimals",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8" }],
+  },
+] as const;
+
+export async function getTokenBalance(tokenAddress: Address, owner: Address): Promise<bigint> {
+  const c = getXLayerClient();
+  return c.readContract({
+    address: tokenAddress,
+    abi: ERC20_BALANCE_ABI,
+    functionName: "balanceOf",
+    args: [owner],
+  });
+}
+
+export async function getTokenDecimals(tokenAddress: Address): Promise<number> {
+  const c = getXLayerClient();
+  return c.readContract({
+    address: tokenAddress,
+    abi: ERC20_DECIMALS_ABI,
+    functionName: "decimals",
   });
 }

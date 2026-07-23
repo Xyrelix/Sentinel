@@ -113,7 +113,7 @@ export const ConnectWalletModal: React.FC = () => {
                     )}
                   </div>
                   <p className="text-xs text-accent">
-                    {w.isInstalled ? w.desc : 'Not installed — click to get it'}
+                    {w.isInstalled ? w.desc : 'Not installed - click to get it'}
                   </p>
                 </div>
               </div>
@@ -130,7 +130,7 @@ export const ConnectWalletModal: React.FC = () => {
 
         <div className="pt-3 border-t border-[#1E1E1E] flex items-center justify-between text-xs text-accent">
           <div className="flex items-center gap-1.5">
-            <Shield className="w-4 h-4 text-primary" />
+            <img src="/logo.png" alt="Sentinel Logo" className="w-3.5 h-3.5 object-contain" />
             <span>AI Shield Status: Active</span>
           </div>
           <span className="text-white/60">OKX X Layer (Chain ID: {X_LAYER_CHAIN_ID})</span>

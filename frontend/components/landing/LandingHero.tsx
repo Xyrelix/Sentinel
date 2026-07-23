@@ -138,8 +138,8 @@ export const LandingHero: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-[#1E1E1E]">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-primary/20 border border-primary/40 text-primary">
-                  <Icon name="shield" color="%23FF3B30" className="w-5 h-5 animate-pulse" />
+                <div className="w-9 h-9 rounded-xl bg-black/40 border border-primary/30 flex items-center justify-center">
+                  <img src="/logo.png" alt="Sentinel Logo" className="w-6 h-6 object-contain animate-pulse" />
                 </div>
                 <div>
                   <h3 className="text-sm sm:text-base font-bold text-white">Sentinel Guardian AI</h3>
