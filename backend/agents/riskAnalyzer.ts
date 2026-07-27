@@ -80,9 +80,17 @@ export function analyzeRisk(
 
   score = Math.min(score, 100);
 
-  // Clean contract, no flags at all - give an explicit "all clear" reason.
+  // Clean target, no flags at all - give an explicit "all clear" reason,
+  // worded for what was actually scanned: a real transaction (calldata/value
+  // present) vs. a bare contract or wallet lookup - rather than always
+  // saying "transaction".
   if (reasons.length === 0) {
-    reasons.push("No known risk patterns detected in this transaction.");
+    const target = inspection.hasRealPayload
+      ? "transaction"
+      : inspection.isContract
+        ? "contract"
+        : "wallet";
+    reasons.push(`No known risk patterns detected in this ${target}.`);
   }
 
   return {

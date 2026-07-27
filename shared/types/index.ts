@@ -38,6 +38,11 @@ export interface ContractInspectionResult {
   bytecodeSize: number;
   simulationSucceeded: boolean;
   revertReason?: string;
+  // Whether the scanned tx carried real calldata or value, vs. a bare
+  // address/domain lookup - see contractInspector.ts. Lets riskAnalyzer.ts
+  // word its "all clear" message as "transaction" only when one was
+  // actually attempted.
+  hasRealPayload: boolean;
   flags: ContractFlag[];
   // Specific human-readable findings from external threat-intel sources
   // (e.g. GoPlus) - richer than the generic per-flag reason text, since a

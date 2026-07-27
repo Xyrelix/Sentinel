@@ -165,6 +165,7 @@ export async function inspectContract(
     bytecodeSize: contractInfo.bytecodeSize,
     simulationSucceeded: simulation.success,
     revertReason: simulation.revertReason,
+    hasRealPayload,
     flags,
     externalFindings: externalFindings.length ? externalFindings : undefined,
   };
