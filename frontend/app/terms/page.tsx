@@ -40,7 +40,7 @@ const sections = [
   },
   {
     title: "9. Intellectual Property",
-    body: `Sentinel's codebase, branding, and design are the property of their respective contributors. The project source is available on GitHub; the repository's license governs use, modification, and distribution of the code itself.`,
+    body: `Sentinel's codebase, branding, and design are the property of their respective contributors. The project source is available on GitHub under the MIT License, which permits use, modification, and distribution of the code, provided the original copyright notice and license text are included.`,
   },
   {
     title: "10. Termination",
