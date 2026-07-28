@@ -1,4 +1,7 @@
+import { DocsHeader } from "@/components/docs/DocsHeader";
 import { DocsSidebar } from "@/components/docs/DocsSidebar";
+import { DocsPageHeading } from "@/components/docs/DocsPageHeading";
+import { DocsToc } from "@/components/docs/DocsToc";
 
 export default function DocsLayout({
   children,
@@ -6,19 +9,18 @@ export default function DocsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div className="mb-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-          Documentation
-        </h1>
-        <p className="mt-3 text-sm text-accent">
-          How Sentinel works, and how to get the most out of it.
-        </p>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <DocsHeader />
 
-      <div className="flex flex-col md:flex-row gap-10">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 items-start gap-10 px-4 py-12 sm:px-6 lg:px-8">
         <DocsSidebar />
-        <div className="flex-1 space-y-10 min-w-0">{children}</div>
+
+        <main id="doc-content" className="min-w-0 flex-1">
+          <DocsPageHeading />
+          <div className="space-y-10">{children}</div>
+        </main>
+
+        <DocsToc />
       </div>
     </div>
   );
