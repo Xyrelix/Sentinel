@@ -16,7 +16,7 @@ export function DocsSidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:w-48 md:shrink-0">
+    <nav className="md:w-48 md:shrink-0 md:sticky md:top-24 md:self-start">
       <div className="flex md:flex-col gap-1 overflow-x-auto md:overflow-visible pb-4 md:pb-0">
         {links.map((link) => {
           const isActive = pathname === link.href;
