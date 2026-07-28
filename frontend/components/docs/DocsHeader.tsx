@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/Icon";
+import { MaskIcon } from "@/components/ui/MaskIcon";
 import { useSentinelStore } from "@/store/useSentinelStore";
 import { DisconnectConfirmModal } from "@/components/wallet/DisconnectConfirmModal";
 
@@ -55,9 +56,10 @@ export function DocsHeader() {
             href="https://github.com/Xyrelix/Sentinel"
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden sm:inline-flex h-9 items-center rounded-lg border border-[#1E1E1E] px-3 text-xs font-semibold text-accent transition-colors hover:bg-[#111111] hover:text-white"
+            aria-label="GitHub"
+            className="hidden sm:inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#1E1E1E] text-accent transition-colors hover:bg-[#111111] hover:text-white"
           >
-            GitHub
+            <MaskIcon name="github" className="w-4 h-4" />
           </a>
           <Button
             size="sm"

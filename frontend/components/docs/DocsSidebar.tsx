@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Icon } from "@/components/ui/Icon";
+import { MaskIcon } from "@/components/ui/MaskIcon";
 import { docsNav } from "./docsNav";
 
 export function DocsSidebar() {
@@ -28,11 +28,7 @@ export function DocsSidebar() {
                   : "border-transparent text-accent hover:text-white hover:bg-white/5",
               )}
             >
-              <Icon
-                name={link.icon}
-                color={isActive ? "%23FF3B30" : "%23A1A1AA"}
-                className="w-4 h-4 shrink-0"
-              />
+              <MaskIcon name={link.icon} className="w-4 h-4 shrink-0" />
               {link.label}
             </Link>
           );
