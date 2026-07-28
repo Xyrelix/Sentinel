@@ -8,29 +8,29 @@ export const metadata = {
 const sections = [
   {
     title: "1. Overview",
-    body: `Sentinel ("we", "our", "the app") is an AI-powered pre-signature transaction scanner for the OKX Wallet on X Layer. This policy explains what data we collect when you use Sentinel, how it's used, and your choices around it. Sentinel is a hackathon-stage project (OKX.AI Genesis Hackathon) — treat this as an early-stage policy that will evolve as the product matures.`,
+    body: `Sentinel is an AI-powered pre-signature transaction scanner for the OKX Wallet on X Layer. This policy explains what data Sentinel collects when you use it, how that data is used, and your choices around it. Sentinel is a hackathon-stage project (OKX.AI Genesis Hackathon) — treat this as an early-stage policy that will evolve as the product matures.`,
   },
   {
-    title: "2. Data We Collect",
-    body: `Wallet address: When you connect your OKX Wallet, we read your public wallet address to associate scans and reports with your account.
+    title: "2. Data Sentinel Collects",
+    body: `Wallet address: When you connect your OKX Wallet, Sentinel reads your public wallet address to associate scans and reports with your account.
 
-Transaction data: Transactions submitted for scanning (recipient, contract calls, token approvals, value) are analyzed by our risk-scoring agents before you sign.
+Transaction data: Transactions submitted for scanning (recipient, contract calls, token approvals, value) are analyzed by Sentinel's risk-scoring agents before you sign.
 
-Scan and report history: We store a record of past scans, risk scores, and flagged transactions per wallet address in our Supabase database, so you can review your history in the dashboard and reports views.
+Scan and report history: Sentinel stores a record of past scans, risk scores, and flagged transactions per wallet address in its Supabase database, so you can review your history in the dashboard and reports views.
 
-Usage analytics: We use analytics tooling to understand how the app is used (pages visited, features used, general usage patterns). This does not include your private keys, seed phrases, or signed transaction contents beyond what's needed for the scan itself.`,
+Usage analytics: Sentinel uses analytics tooling to understand how the app is used (pages visited, features used, general usage patterns). This does not include your private keys, seed phrases, or signed transaction contents beyond what's needed for the scan itself.`,
   },
   {
-    title: "3. What We Never Collect",
-    body: `Sentinel never has access to your private keys or seed phrase. All wallet interactions happen through the OKX Wallet SDK using standard read-only and signature-request flows — we cannot sign or move funds on your behalf.`,
+    title: "3. What Sentinel Never Collects",
+    body: `Sentinel never has access to your private keys or seed phrase. All wallet interactions happen through the OKX Wallet SDK using standard read-only and signature-request flows — Sentinel cannot sign or move funds on your behalf.`,
   },
   {
-    title: "4. How We Use Your Data",
-    body: `To perform pre-signature risk analysis and return a risk score/explanation. To maintain your scan and report history so you can track flagged wallets, contracts, and past activity. To query third-party threat-intelligence sources (e.g. Chainabuse, GoPlus, ENS resolution, phishing-list databases) using relevant transaction/contract identifiers — not your wallet identity. To improve the product based on aggregate usage analytics.`,
+    title: "4. How Sentinel Uses Your Data",
+    body: `Data is used to perform pre-signature risk analysis and return a risk score/explanation, to maintain your scan and report history so you can track flagged wallets, contracts, and past activity, to query third-party threat-intelligence sources (e.g. Chainabuse, GoPlus, ENS resolution, phishing-list databases) using relevant transaction/contract identifiers — not your wallet identity — and to improve the product based on aggregate usage analytics.`,
   },
   {
     title: "5. Third-Party Services",
-    body: `Sentinel relies on the following third parties, each with their own data practices: Supabase (database hosting), OKX Wallet SDK (wallet connectivity), X Layer RPC providers (on-chain data), and threat-intelligence APIs such as Chainabuse and GoPlus (contract/address risk data). We recommend reviewing their respective privacy policies.`,
+    body: `Sentinel relies on the following third parties, each with their own data practices: Supabase (database hosting), OKX Wallet SDK (wallet connectivity), X Layer RPC providers (on-chain data), and threat-intelligence APIs such as Chainabuse and GoPlus (contract/address risk data). Reviewing their respective privacy policies is recommended.`,
   },
   {
     title: "6. Data Retention",
@@ -38,15 +38,15 @@ Usage analytics: We use analytics tooling to understand how the app is used (pag
   },
   {
     title: "7. Your Choices",
-    body: `You can disconnect your wallet at any time, which stops any new activity from being associated with your address. To request access to or deletion of data tied to your wallet address, open an issue on our GitHub repository.`,
+    body: `You can disconnect your wallet at any time, which stops any new activity from being associated with your address. To request access to or deletion of data tied to your wallet address, an issue can be opened on Sentinel's GitHub repository.`,
   },
   {
     title: "8. Changes to This Policy",
-    body: `As Sentinel moves from hackathon project toward production, this policy will be updated to reflect new features, storage practices, or third-party integrations. Check back periodically.`,
+    body: `As Sentinel moves from hackathon project toward production, this policy will be updated to reflect new features, storage practices, or third-party integrations. Checking back periodically is recommended.`,
   },
   {
     title: "9. Contact",
-    body: `For privacy-related questions, data access, or deletion requests, please open an issue on our GitHub repository.`,
+    body: `For privacy-related questions, data access, or deletion requests, an issue can be opened on Sentinel's GitHub repository.`,
   },
 ];
 

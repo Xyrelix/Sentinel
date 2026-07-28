@@ -8,7 +8,7 @@ export const metadata = {
 const sections = [
   {
     title: "1. Acceptance of Terms",
-    body: `By accessing or using Sentinel ("the app", "the service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the service. Sentinel is provided as a hackathon-stage project (OKX.AI Genesis Hackathon) and these terms may change as the product evolves.`,
+    body: `By accessing or using Sentinel, you agree to be bound by these Terms of Service. If you do not agree, do not use the service. Sentinel is provided as a hackathon-stage project (OKX.AI Genesis Hackathon) and these terms may change as the product evolves.`,
   },
   {
     title: "2. Description of Service",
@@ -20,7 +20,7 @@ const sections = [
   },
   {
     title: "4. No Warranty",
-    body: `Sentinel is provided "as is" and "as available," without warranties of any kind, express or implied. We do not guarantee that risk analysis will be accurate, complete, or catch every scam, exploit, or malicious contract. Threat intelligence relies in part on third-party data sources (e.g. Chainabuse, GoPlus, ENS, phishing-list databases) which may themselves be incomplete or delayed.`,
+    body: `Sentinel is provided "as is" and "as available," without warranties of any kind, express or implied. Sentinel does not guarantee that its risk analysis will be accurate, complete, or catch every scam, exploit, or malicious contract. Its threat intelligence relies in part on third-party data sources (e.g. Chainabuse, GoPlus, ENS, phishing-list databases) which may themselves be incomplete or delayed.`,
   },
   {
     title: "5. Limitation of Liability",
@@ -28,23 +28,23 @@ const sections = [
   },
   {
     title: "6. Wallet Security",
-    body: `Sentinel connects to your OKX Wallet using standard read and signature-request flows via the OKX Wallet SDK. We never have access to your private keys or seed phrase, and we cannot move funds without your explicit signature. You remain solely responsible for securing your wallet credentials.`,
+    body: `Sentinel connects to your OKX Wallet using standard read and signature-request flows via the OKX Wallet SDK. Sentinel never has access to your private keys or seed phrase, and cannot move funds without your explicit signature. You remain solely responsible for securing your wallet credentials.`,
   },
   {
     title: "7. Your Data",
-    body: `Your wallet address and associated scan/report history are stored to power the dashboard and reports features. See our Privacy Policy for full details on data collection and use.`,
+    body: `Your wallet address and associated scan/report history are stored to power the dashboard and reports features. Sentinel's Privacy Policy has full details on data collection and use.`,
   },
   {
     title: "8. Prohibited Use",
-    body: `You agree not to use Sentinel to facilitate illegal activity, attempt to reverse-engineer or disrupt the scanning infrastructure, or misrepresent Sentinel's risk output for fraudulent purposes.`,
+    body: `You agree not to use Sentinel to facilitate illegal activity, attempt to reverse-engineer or disrupt its scanning infrastructure, or misrepresent Sentinel's risk output for fraudulent purposes.`,
   },
   {
     title: "9. Intellectual Property",
-    body: `Sentinel's codebase, branding, and design are the property of their respective contributors. The project source is available on GitHub; refer to the repository's license for terms governing use, modification, and distribution of the code itself.`,
+    body: `Sentinel's codebase, branding, and design are the property of their respective contributors. The project source is available on GitHub; the repository's license governs use, modification, and distribution of the code itself.`,
   },
   {
     title: "10. Termination",
-    body: `We reserve the right to suspend or restrict access to Sentinel, in whole or in part, at any time — particularly during this hackathon/early-stage phase where uptime and continuity are not guaranteed.`,
+    body: `Sentinel reserves the right to suspend or restrict access, in whole or in part, at any time — particularly during this hackathon/early-stage phase where uptime and continuity are not guaranteed.`,
   },
   {
     title: "11. Changes to These Terms",
@@ -52,7 +52,7 @@ const sections = [
   },
   {
     title: "12. Contact",
-    body: `For questions about these terms, please open an issue on our GitHub repository.`,
+    body: `For questions about these terms, an issue can be opened on Sentinel's GitHub repository.`,
   },
 ];
 
