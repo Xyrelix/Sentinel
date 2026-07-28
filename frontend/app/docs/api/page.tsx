@@ -1,39 +1,10 @@
-import Link from "next/link";
+import { DocSection } from "@/components/docs/DocSection";
 
 export const metadata = {
-  title: "Documentation | Sentinel",
-  description: "How Sentinel works and how to use it.",
+  title: "API Reference | Sentinel Docs",
 };
 
 const sections = [
-  {
-    title: "What Sentinel Does",
-    body: `Sentinel is an AI-powered pre-signature transaction scanner built for the OKX Wallet on X Layer. Before a transaction is signed, Sentinel analyzes it for scam patterns, malicious contract behavior, and wallet-draining exploits, then surfaces a plain-English risk explanation so the decision to sign stays informed.`,
-  },
-  {
-    title: "Getting Started",
-    body: `Connect an OKX Wallet using the "Connect Wallet" button in the navbar. Once connected, Sentinel unlocks the Dashboard, AI Scanner, Wallet Health, Approvals, and Threat Intel views. No account creation or email is required — access is tied to the connected wallet address.`,
-  },
-  {
-    title: "AI Scanner",
-    body: `The Scanner view analyzes a pending transaction before it's signed. It inspects the target contract, requested permissions, and transaction parameters, then returns a risk score alongside a plain-English breakdown of what the transaction actually does. Flagged transactions are logged to the wallet's report history for later review.`,
-  },
-  {
-    title: "Wallet Health",
-    body: `Wallet Health gives a broader view of a connected wallet's exposure — active token approvals, interactions with previously flagged contracts, and general risk posture across past activity.`,
-  },
-  {
-    title: "Approvals Manager",
-    body: `The Approvals view lists active token approvals granted by the connected wallet and allows revoking approvals that are no longer needed or that appear risky, reducing exposure to draining exploits that rely on stale permissions.`,
-  },
-  {
-    title: "Threat Intel",
-    body: `The Threat Intel view surfaces community and third-party threat data — including known phishing addresses and flagged contracts — sourced from providers such as Chainabuse and GoPlus, combined with ENS resolution and phishing-list databases. Community-submitted reports are unverified — category and severity are set by the reporter, not by AI analysis.`,
-  },
-  {
-    title: "Architecture",
-    body: `Sentinel's frontend is built with Next.js (App Router), React, TypeScript, and Tailwind CSS. The backend runs as Next.js API routes, with a dedicated agents layer handling AI-driven risk analysis (contract inspection, risk scoring, and scam detection). Data is persisted in Supabase/PostgreSQL, on-chain reads go through X Layer RPC, and wallet connectivity is handled via the OKX Wallet SDK.`,
-  },
   {
     title: "API Overview",
     body: `Sentinel exposes a small set of internal API routes consumed by the frontend:`,
@@ -75,10 +46,6 @@ Request body:`,
 400  { "error": "to (target address, ENS name, or domain) is required." }
 404  { "error": "Could not resolve ENS name \\"...\\"" }
 500  { "error": "Scan failed." }`,
-  },
-  {
-    title: "Pricing",
-    body: `The scan endpoint can optionally be gated behind an x402 micropayment (via the OKX facilitator on X Layer). This is opt-in — it only activates once payment credentials and a payout address are configured on the backend. Until then, scanning remains free.`,
   },
   {
     title: "GET /api/wallet-health",
@@ -228,52 +195,8 @@ Query parameters:`,
 502  { "error": "Failed to fetch price." } // or a specific upstream error message
 }`,
   },
-  {
-    title: "Contributing",
-    body: `Sentinel's source is available on GitHub under the MIT License. Issues and pull requests are welcome — see the repository's README for local setup instructions.`,
-  },
 ];
 
-export default function DocumentationPage() {
-  return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-      <div className="mb-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-          Documentation
-        </h1>
-        <p className="mt-3 text-sm text-accent">
-          How Sentinel works, and how to get the most out of it.
-        </p>
-      </div>
-
-      <div className="space-y-10">
-        {sections.map((section) => (
-          <section
-            key={section.title}
-            className="border-b border-[#1E1E1E] pb-8 last:border-0"
-          >
-            <h2 className="text-lg font-bold text-white mb-3">
-              {section.title}
-            </h2>
-            {section.body && (
-              <p className="text-sm text-accent leading-relaxed whitespace-pre-line">
-                {section.body}
-              </p>
-            )}
-            {section.code && (
-              <pre className="mt-4 rounded-lg border border-[#1E1E1E] bg-[#0A0A0A] p-4 text-xs text-accent overflow-x-auto font-mono">
-                {section.code}
-              </pre>
-            )}
-          </section>
-        ))}
-      </div>
-
-      <div className="mt-16 pt-8 border-t border-[#1E1E1E]">
-        <Link href="/" className="text-sm text-primary hover:underline">
-          ← Back to Sentinel
-        </Link>
-      </div>
-    </div>
-  );
+export default function DocsApiPage() {
+  return sections.map((s) => <DocSection key={s.title} {...s} />);
 }
