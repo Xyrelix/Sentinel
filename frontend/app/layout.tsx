@@ -59,7 +59,7 @@ export default function RootLayout({
             </div>
 
             <div className="flex items-center gap-6">
-              <a href="#" className="hover:text-primary transition-colors">GitHub</a>
+              <a href="https://github.com/Xyrelix/Sentinel" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">GitHub</a>
               <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
               <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
               <a href="#" className="hover:text-primary transition-colors">Documentation</a>
