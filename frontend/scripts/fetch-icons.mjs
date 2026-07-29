@@ -25,6 +25,8 @@ const lucide = [
   'download', 'award', 'terminal', 'refresh-cw', 'x-circle', 'alert-triangle',
   'info', 'chevron-down', 'shield-alert', 'mouse-pointer', 'sliders',
   'alert-octagon', 'x',
+  // Docs page (header + sidebar section icons)
+  'github', 'book-open', 'layers', 'network', 'braces', 'git-branch',
 ];
 
 const brands = {

@@ -2,52 +2,90 @@ Sentinel/
 ├── .env.example
 ├── .env.local
 ├── .gitignore
-├── LICENSE
-├── README.md
 ├── filetree.txt
+├── LICENSE
 ├── package-lock.json
 ├── package.json
-├── frontend/
+├── README.md
+├── backend/
 │   ├── .env.local
 │   ├── package.json
 │   ├── tsconfig.json
-│   ├── tsconfig.tsbuildinfo
+│   ├── agents/
+│   │   ├── contractInspector.ts
+│   │   ├── riskAnalyzer.ts
+│   │   └── scamDetectionAgent.ts
+│   ├── api/
+│   │   ├── revoke.ts
+│   │   ├── threatIntel.ts
+│   │   └── walletHealth.ts
+│   ├── lib/
+│   │   ├── chainabuse.ts
+│   │   ├── ens.ts
+│   │   ├── goplus.ts
+│   │   ├── logger.ts
+│   │   ├── phishingList.ts
+│   │   ├── pricing.ts
+│   │   ├── utils.ts
+│   │   ├── db/
+│   │   │   └── supabase.ts
+│   │   ├── okx/
+│   │   │   └── walletSdk.ts
+│   │   ├── rpc/
+│   │   │   └── multiChain.ts
+│   │   └── xlayer/
+│   │       └── rpcClient.ts
+│   ├── scripts/
+│   │   ├── test-auth.ts
+│   │   ├── test-revoke.ts
+│   │   ├── test-scan.ts
+│   │   ├── test-supabase.ts
+│   │   └── test-wallet-health.ts
+│   └── types/
+│       └── eth-phishing-detect.d.ts
+├── contracts/
+│   ├── scripts/
+│   │   └── README.md
+│   └── src/
+│       └── README.md
+├── frontend/
+│   ├── .env.local
 │   ├── next-env.d.ts
 │   ├── next.config.mjs
+│   ├── package.json
 │   ├── postcss.config.js
 │   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   ├── tsconfig.tsbuildinfo
 │   ├── app/
+│   │   ├── globals.css
+│   │   ├── icon.png
+│   │   ├── layout.tsx
+│   │   ├── page.tsx
 │   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   │   ├── nonce/
+│   │   │   │   │   └── route.ts
+│   │   │   │   └── verify/
+│   │   │   │       └── route.ts
+│   │   │   ├── price/
+│   │   │   │   └── route.ts
+│   │   │   ├── revoke/
+│   │   │   │   └── route.ts
 │   │   │   ├── scan/
 │   │   │   │   └── route.ts
-│   │   │   ├── risk-score/
+│   │   │   ├── threat-intel/
 │   │   │   │   └── route.ts
-│   │   │   ├── wallet-health/
-│   │   │   │   └── route.ts
-│   │   │   └── revoke/
+│   │   │   └── wallet-health/
 │   │   │       └── route.ts
-│   │   ├── fonts/
-│   │   │   ├── Audex-Italic.ttf
-│   │   │   └── Audex-Regular.ttf
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
+│   │   └── fonts/
+│   │       ├── Audex-Italic.ttf
+│   │       └── Audex-Regular.ttf
 │   ├── components/
-│   │   ├── TransactionScanner.tsx
-│   │   ├── RiskScoreCard.tsx
-│   │   ├── WalletHealthMonitor.tsx
-│   │   ├── ApprovalRevoke.tsx
 │   │   ├── approvals/
 │   │   │   └── ApprovalManagerView.tsx
 │   │   ├── community/
 │   │   │   └── ThreatIntelView.tsx
-│   │   ├── components/
-│   │   │   ├── ApprovalRevoke.tsx
-│   │   │   ├── RiskScoreCard.tsx
-│   │   │   ├── TransactionScanner.tsx
-│   │   │   ├── WalletHealthMonitor.tsx
-│   │   │   └── ui/
-│   │   │       └── .gitkeep
 │   │   ├── dashboard/
 │   │   │   └── DashboardView.tsx
 │   │   ├── landing/
@@ -63,63 +101,80 @@ Sentinel/
 │   │   ├── ui/
 │   │   │   ├── AnimatedNumber.tsx
 │   │   │   ├── AnimatedText.tsx
-│   │   │   ├── BackgroundCanvas.tsx
 │   │   │   ├── Badge.tsx
+│   │   │   ├── button.tsx
 │   │   │   ├── CustomCursor.tsx
+│   │   │   ├── dotted-surface.tsx
 │   │   │   ├── GlowCard.tsx
+│   │   │   ├── Icon.tsx
+│   │   │   ├── menu-toggle-icon.tsx
 │   │   │   ├── Modal.tsx
 │   │   │   ├── RiskGauge.tsx
 │   │   │   ├── TextShimmer.tsx
 │   │   │   ├── Toast.tsx
-│   │   │   ├── animated-shader-background.tsx
-│   │   │   ├── button.tsx
-│   │   │   ├── dotted-surface.tsx
-│   │   │   ├── header-2.tsx
-│   │   │   ├── menu-toggle-icon.tsx
-│   │   │   ├── pixel-perfect-hero.tsx
 │   │   │   └── use-scroll.ts
 │   │   └── wallet/
 │   │       ├── ConnectWalletModal.tsx
+│   │       ├── DisconnectConfirmModal.tsx
 │   │       └── WalletHealthView.tsx
 │   ├── lib/
-│   │   └── utils.ts
+│   │   ├── pdf.ts
+│   │   ├── utils.ts
+│   │   ├── web3.ts
+│   │   ├── x402.ts
+│   │   └── x402Server.ts
 │   ├── public/
+│   │   ├── logo.png
+│   │   ├── Sentinel4.png
+│   │   ├── sentinel-wordmark.svg
+│   │   ├── brands/
+│   │   │   ├── coinbase.svg
+│   │   │   ├── crewai.svg
+│   │   │   ├── genericwallet.svg
+│   │   │   ├── langchain.svg
+│   │   │   ├── metamask.svg
+│   │   │   ├── okx.svg
+│   │   │   ├── openai.svg
+│   │   │   ├── postgresql.svg
+│   │   │   ├── supabase.svg
+│   │   │   └── xlayer.svg
+│   │   ├── icons/
+│   │   │   └── lucide/
+│   │   │       ├── activity.svg
+│   │   │       ├── alert-octagon.svg
+│   │   │       ├── alert-triangle.svg
+│   │   │       ├── arrow-right.svg
+│   │   │       ├── arrow-up-right.svg
+│   │   │       ├── award.svg
+│   │   │       ├── check-circle-2.svg
+│   │   │       ├── chevron-down.svg
+│   │   │       ├── chevron-right.svg
+│   │   │       ├── cpu.svg
+│   │   │       ├── download.svg
+│   │   │       ├── info.svg
+│   │   │       ├── lock.svg
+│   │   │       ├── mouse-pointer.svg
+│   │   │       ├── refresh-cw.svg
+│   │   │       ├── scan.svg
+│   │   │       ├── shield.svg
+│   │   │       ├── shield-alert.svg
+│   │   │       ├── shield-check.svg
+│   │   │       ├── sliders.svg
+│   │   │       ├── sparkles.svg
+│   │   │       ├── terminal.svg
+│   │   │       ├── wallet.svg
+│   │   │       ├── x.svg
+│   │   │       └── x-circle.svg
 │   │   └── public/
 │   │       └── .gitkeep
+│   ├── scripts/
+│   │   └── fetch-icons.mjs
 │   ├── store/
 │   │   └── useSentinelStore.ts
 │   └── types/
+│       ├── eth-phishing-detect.d.ts
+│       ├── ethereum.d.ts
 │       └── sentinel.ts
-├── backend/
-│   ├── .env.local
-│   ├── package.json
-│   ├── tsconfig.json
-│   ├── api/
-│   │   ├── scan.ts
-│   │   ├── riskScore.ts
-│   │   ├── walletHealth.ts
-│   │   └── revoke.ts
-│   ├── agents/
-│   │   ├── scamDetectionAgent.ts
-│   │   ├── riskAnalyzer.ts
-│   │   └── contractInspector.ts
-│   ├── lib/
-│   │   ├── db/
-│   │   │   └── supabase.ts
-│   │   ├── okx/
-│   │   │   └── walletSdk.ts
-│   │   ├── xlayer/
-│   │   │   └── rpcClient.ts
-│   │   └── utils.ts
-│   └── scripts/
-│       ├── test-scan.ts
-│       └── test-supabase.ts
-├── contracts/
-│   ├── src/
-│   │   └── README.md
-│   └── scripts/
-│       └── README.md
-├── shared/
-│   └── types/
-│       └── index.ts
-└── .git/
+└── shared/
+    └── types/
+        └── index.ts
