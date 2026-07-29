@@ -1,0 +1,111 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sentinel Scan API",
+    "version": "1.0.0",
+    "description": "Pre-signature risk scanning for wallet addresses, ENS names, domains, contract calls, and transaction payloads.",
+    "contact": {
+      "email": "navigatorabraham@gmail.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://sentinel-rho-two.vercel.app"
+    }
+  ],
+  "paths": {
+    "/api/scan": {
+      "post": {
+        "operationId": "scan",
+        "summary": "Pre-signature risk scan",
+        "description": "Pre-signature risk scan for a contract/wallet address, ENS name, domain, or transaction payload. Paid via x402 (price set by X402_SCAN_PRICE_USD, default $0.01).",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["to"],
+                "properties": {
+                  "to": {
+                    "type": "string",
+                    "description": "Target to scan: a contract/wallet address (0x...), an ENS name (e.g. vitalik.eth), or a domain (e.g. example.com)."
+                  },
+                  "from": {
+                    "type": "string",
+                    "description": "Sender address for transaction-context simulation. Defaults to the burn address when omitted."
+                  },
+                  "data": {
+                    "type": "string",
+                    "description": "Transaction calldata as a 0x-prefixed hex string. Defaults to \"0x\" (no calldata) when omitted."
+                  },
+                  "value": {
+                    "type": "string",
+                    "description": "Transaction value in wei, as a decimal string. Defaults to 0 when omitted."
+                  },
+                  "chainId": {
+                    "type": "integer",
+                    "description": "EVM chain ID the transaction targets. Defaults to the service's configured chain when omitted."
+                  }
+                }
+              },
+              "example": {
+                "to": "0x1234567890abcdef1234567890abcdef12345678",
+                "from": "0x000000000000000000000000000000000000dEaD",
+                "data": "0x",
+                "value": "0",
+                "chainId": 196
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Risk scan result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "score": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "description": "Risk score, 0 (safe) to 100 (high-risk)."
+                    },
+                    "label": {
+                      "type": "string",
+                      "enum": ["safe", "caution", "high-risk"]
+                    },
+                    "reasons": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "Human-readable findings backing the score."
+                    },
+                    "resolvedAddress": {
+                      "type": "string",
+                      "description": "Present when \"to\" was an ENS name that resolved to an address."
+                    }
+                  },
+                  "required": ["score", "label", "reasons"]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing required \"to\" field."
+          },
+          "402": {
+            "description": "Payment required (x402)."
+          },
+          "404": {
+            "description": "ENS name did not resolve to an address."
+          },
+          "500": {
+            "description": "Scan failed."
+          }
+        }
+      }
+    }
+  }
+}
